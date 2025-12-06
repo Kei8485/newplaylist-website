@@ -1,0 +1,21 @@
+{
+  "artists": [
+    {
+      "name": "Queen",
+      "songs": [
+        {
+          "title": "Bohemian Rhapsody",
+          "genre": "Rock",
+          "audio": "../audios/queenSongs/Queen-Bohemian-Rhapsody.mp3",
+          "picture": "../img/songPicture/queenPicture/bohemianRhapsody.png"
+        },
+        {
+          "title": "Killer Queen",
+          "genre": "Rock",
+          "audio": "../audios/queenSongs/Killer Queen (Remastered 2011).mp3",
+          "picture": "../img/songPicture/queenPicture/bohemianRhapsody.png"
+        }
+      ]
+    }
+  ]
+}
