@@ -13,6 +13,7 @@ let upNextQueue = [
 let playedHistory = []; // history of played songs
 let isPlaying = false; // play/pause state
 
+const body = document.querySelector("body");
 const footer = document.querySelector(".footer__container");
 const footerSongImg = document.querySelector(".footer__song-img");
 const footerSongTitle = document.querySelector(".footer__song-name");
@@ -42,8 +43,142 @@ const footerAudioProgDurationEnd = document.querySelector(
 
 const fullScreenBtn = document.querySelector(".footer__maximize-wrapper");
 
+let allSongs = [];
+let likedSongs = [];
+let isFullscreen = false;
+
 // ----------------------------
-// 2. Update footer function
+// 2. Wait for DOM to load
+// ----------------------------
+document.addEventListener("DOMContentLoaded", () => {
+  // ----------------------------
+  // Fetch JSON & initialize player
+  // ----------------------------
+  fetch("../json/SystemMusic.json")
+    .then((response) => {
+      if (!response.ok) throw new Error("JSON file not found");
+      return response.json();
+    })
+    .then((data) => {
+      // Load first song for footer
+      if (data.artists.length > 0 && data.artists[0].songs.length > 0) {
+        const artist = data.artists[0];
+        const song = {
+          ...artist.songs[0],
+          artistName: artist.name,
+          isFavorite: false,
+        };
+
+        currentlyPlaying = song;
+        playedHistory.push(currentlyPlaying);
+        updateFooter(currentlyPlaying);
+        updateHeartIcon();
+      } else {
+        updateFooter(null);
+      }
+
+      // Populate allSongs for search
+      allSongs = [];
+      data.artists.forEach((artist) => {
+        artist.songs.forEach((song) => {
+          allSongs.push({
+            title: song.title,
+            genre: song.genre,
+            audio: song.audio,
+            picture: song.picture,
+            artistName: artist.name,
+            duration: song.duration || "0:00",
+            isFavorite: false,
+          });
+        });
+      });
+
+      // Display all songs in search
+      displaySongs(allSongs);
+    })
+    .catch((error) => {
+      console.error("Error loading JSON:", error);
+      updateFooter(null);
+    });
+
+  // ----------------------------
+  // Footer / Play functions
+  // ----------------------------
+  footerBtnBack.addEventListener("click", () => {
+    if (playedHistory.length > 1) {
+      const lastSong = playedHistory.pop();
+      const previousSong = playedHistory[playedHistory.length - 1];
+      upNextQueue.unshift(lastSong);
+      playSong(previousSong);
+      updatePlayPauseIcon();
+    }
+  });
+
+  footerBtnForward.addEventListener("click", () => {
+    if (upNextQueue.length > 0) {
+      const nextSong = upNextQueue.shift();
+      playSong(nextSong);
+      updatePlayPauseIcon();
+    }
+  });
+
+  footerBtnPausePlay.addEventListener("click", () => {
+    if (!currentlyPlaying) return;
+    if (!isPlaying) {
+      footerAudio.play();
+      isPlaying = true;
+    } else {
+      footerAudio.pause();
+      isPlaying = false;
+    }
+    updatePlayPauseIcon();
+  });
+
+  footerAudio.addEventListener("timeupdate", updateProgress);
+  footerAudio.addEventListener("ended", autoPlayNext);
+
+  footerAudioProgWrap.addEventListener("click", seekAudio);
+  footerAudioProgWrap.addEventListener("mousedown", startDrag);
+  document.addEventListener("mousemove", dragProgress);
+  document.addEventListener("mouseup", endDrag);
+
+  heartIcons.forEach((icon) => {
+    icon.addEventListener("click", () => {
+      if (!currentlyPlaying) return;
+      toggleLike(currentlyPlaying);
+    });
+  });
+
+  fullScreenBtn.addEventListener("click", toggleFullscreen);
+
+  // After allSongs is populated
+  const searchInput = document.querySelector(".header__input");
+  const searchPartContainer = document.querySelector(".search-part-container");
+  const searchContainerDiv = document.querySelector(".search-song-container");
+
+  // Show filtered songs as user types
+  searchInput.addEventListener("input", () => {
+    const query = searchInput.value.toLowerCase();
+    const filteredSongs = allSongs.filter(
+      (song) =>
+        song.title.toLowerCase().includes(query) ||
+        song.artistName.toLowerCase().includes(query)
+    );
+
+    // Display filtered songs
+    displaySongs(filteredSongs);
+
+    // Show or hide search container
+    if (filteredSongs.length > 0) {
+      searchPartContainer.classList.add("active");
+    } else {
+      searchPartContainer.classList.remove("active");
+    }
+  });
+});
+
+// ----------------------------
+// Functions
 // ----------------------------
 function updateFooter(song) {
   if (!song) {
@@ -54,102 +189,30 @@ function updateFooter(song) {
     footer.style.display = "none";
     return;
   }
-
   footerSongImg.src = song.picture;
   footerSongTitle.textContent = song.title;
   footerSongArtist.textContent = song.artistName;
   footerAudio.src = song.audio;
-
   footer.style.display = "block";
 }
 
-// ----------------------------
-// 3. Fetch JSON and load first song
-// ----------------------------
-fetch("../json/SystemMusic.json")
-  .then((response) => response.json())
-  .then((data) => {
-    if (data.artists.length > 0 && data.artists[0].songs.length > 0) {
-      const artist = data.artists[0];
-      const song = {
-        ...artist.songs[0],
-        artistName: artist.name,
-        isFavorite: false,
-      };
-
-      currentlyPlaying = song;
-      playedHistory.push(currentlyPlaying); // add first song to history
-      updateFooter(currentlyPlaying);
-    } else {
-      updateFooter(null);
-    }
-  })
-  .catch((error) => {
-    console.error("Error loading JSON:", error);
-    updateFooter(null);
-  });
-
-// ----------------------------
-// 4. Play song function
-// ----------------------------
 function playSong(song) {
   if (!song) return;
-
   currentlyPlaying = song;
   updateFooter(currentlyPlaying);
   footerAudio.play();
   isPlaying = true;
-  updatePlayPauseIcon();
 
-  // Add to history if last song is not the same
   if (
     playedHistory.length === 0 ||
     playedHistory[playedHistory.length - 1] !== song
   ) {
     playedHistory.push(song);
   }
-}
 
-// ----------------------------
-// 5. Back / Forward buttons
-// ----------------------------
-footerBtnBack.addEventListener("click", () => {
-  if (playedHistory.length > 1) {
-    const lastSong = playedHistory.pop(); // remove current
-    const previousSong = playedHistory[playedHistory.length - 1];
-
-    // Put the last song at the start of the queue
-    upNextQueue.unshift(lastSong);
-
-    playSong(previousSong);
-    updatePlayPauseIcon();
-  }
-});
-
-footerBtnForward.addEventListener("click", () => {
-  if (upNextQueue.length > 0) {
-    const nextSong = upNextQueue.shift(); // remove first from queue
-    playSong(nextSong);
-    updatePlayPauseIcon();
-  }
-});
-
-// ----------------------------
-// 6. Play/pause button
-// ----------------------------
-footerBtnPausePlay.addEventListener("click", () => {
-  if (!currentlyPlaying) return;
-
-  if (!isPlaying) {
-    footerAudio.play();
-    isPlaying = true;
-  } else {
-    footerAudio.pause();
-    isPlaying = false;
-  }
-
+  updateHeartIcon();
   updatePlayPauseIcon();
-});
+}
 
 function updatePlayPauseIcon() {
   if (isPlaying) {
@@ -164,83 +227,135 @@ function updatePlayPauseIcon() {
     );
   }
 }
+function displaySongs(songs) {
+  const searchContainerDiv = document.querySelector(".search-song-container");
+  if (!searchContainerDiv) return;
+  searchContainerDiv.innerHTML = "";
 
-// ----------------------------
-// 7. Footer heart/favorite toggle
-// ----------------------------
-let likedSongs = []; // array to store liked songs
+  songs.forEach((song) => {
+    const card = document.createElement("div");
+    card.classList.add("song-card");
+
+    card.innerHTML = `
+      <img class="song-img" src="${song.picture}" alt="${song.title}" />
+      
+      <div class="play-song-btn" data-action="">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+          <path
+            d="M187.2 100.9C174.8 94.1 159.8 94.4 147.6 101.6C135.4 108.8 128 121.9 128 136L128 504C128 518.1 135.5 531.2 147.6 538.4C159.7 545.6 174.8 545.9 187.2 539.1L523.2 355.1C536 348.1 544 334.6 544 320C544 305.4 536 291.9 523.2 284.9L187.2 100.9z"
+          />
+        </svg>
+      </div>
+
+      <div class="song-desc">
+        <span class="song-title">${song.title}</span>
+        <span class="song-artist-name">${song.artistName}</span>
+      </div>
+
+      <div class="song-desc-lower-part">
+        <div class="song-duration-container">
+          <span class="song-duration">0:00</span>
+          <svg class="heart-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+            <path
+              d="M305 151.1L320 171.8L335 151.1C360 116.5 400.2 96 442.9 96C516.4 96 576 155.6 576 229.1L576 231.7C576 343.9 436.1 474.2 363.1 529.9C350.7 539.3 335.5 544 320 544C304.5 544 289.2 539.4 276.9 529.9C203.9 474.2 64 343.9 64 231.7L64 229.1C64 155.6 123.6 96 197.1 96C239.8 96 280 116.5 305 151.1z"
+            />
+          </svg>
+        </div>
+      </div>
+    `;
+
+    // Compute actual duration
+    const durationSpan = card.querySelector(".song-duration");
+    const audio = new Audio(song.audio);
+    audio.addEventListener("loadedmetadata", () => {
+      const min = Math.floor(audio.duration / 60);
+      const sec = Math.floor(audio.duration % 60)
+        .toString()
+        .padStart(2, "0");
+      durationSpan.textContent = `${min}:${sec}`;
+    });
+
+    // Play only on play button click
+    const playBtn = card.querySelector(".play-song-btn");
+    playBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      playSong(song);
+    });
+
+    // Heart icon functionality
+    const heartIcon = card.querySelector(".heart-icon");
+
+    // Set initial liked state
+    const isLiked = likedSongs.some(
+      (liked) =>
+        liked.title === song.title && liked.artistName === song.artistName
+    );
+    heartIcon.classList.toggle("heart-icon--active", isLiked);
+
+    heartIcon.addEventListener("click", (e) => {
+      e.stopPropagation(); // Prevent playing the song
+      toggleLike(song); // <-- updates footer and search hearts
+    });
+
+    searchContainerDiv.appendChild(card);
+  });
+}
 
 function updateHeartIcon() {
-  if (!currentlyPlaying) {
-    return;
-  }
-
+  if (!currentlyPlaying) return;
   heartIcons.forEach((icon) => {
     const isLiked = likedSongs.some(
       (song) =>
         song.title === currentlyPlaying.title &&
         song.artistName === currentlyPlaying.artistName
     );
-
-    if (isLiked) {
-      icon.classList.add("heart-icon--active");
-    } else {
-      icon.classList.remove("heart-icon--active");
-    }
+    icon.classList.toggle("heart-icon--active", isLiked);
   });
 }
 
-heartIcons.forEach((icon) => {
-  icon.addEventListener("click", () => {
-    if (!currentlyPlaying) return; // do nothing if no song is playing
-
-    const index = likedSongs.findIndex(
-      (song) =>
-        song.title === currentlyPlaying.title &&
-        song.artistName === currentlyPlaying.artistName
-    );
-
-    if (index === -1) {
-      // not in likedSongs, add it
-      likedSongs.push(currentlyPlaying);
-      console.log("Liked song added:", currentlyPlaying.title);
-    } else {
-      // already in likedSongs, remove it
-      likedSongs.splice(index, 1);
-      console.log("Liked song removed:", currentlyPlaying.title);
-    }
-
-    // update the icon visual
-    updateHeartIcon();
-  });
-});
-
-// Call updateHeartIcon() every time you play a new song
-function playSong(song) {
+function toggleLike(song) {
   if (!song) return;
 
-  currentlyPlaying = song;
-  updateFooter(currentlyPlaying);
-  footerAudio.play();
-  isPlaying = true;
+  // Add or remove from likedSongs
+  const index = likedSongs.findIndex(
+    (s) => s.title === song.title && s.artistName === song.artistName
+  );
 
-  if (
-    playedHistory.length === 0 ||
-    playedHistory[playedHistory.length - 1] !== song
-  ) {
-    playedHistory.push(song);
-  }
+  if (index === -1) likedSongs.push(song);
+  else likedSongs.splice(index, 1);
 
-  // Update heart icon for the new song
-  updateHeartIcon();
+  // Update footer heart
+  heartIcons.forEach((icon) => {
+    const isLiked = likedSongs.some(
+      (s) =>
+        s.title === currentlyPlaying.title &&
+        s.artistName === currentlyPlaying.artistName
+    );
+    icon.classList.toggle("heart-icon--active", isLiked);
+  });
+
+  // Update hearts in search results
+  const searchHearts = document.querySelectorAll(".song-card .heart-icon");
+  searchHearts.forEach((icon) => {
+    const card = icon.closest(".song-card");
+    const title = card.querySelector(".song-title").textContent;
+    const artist = card.querySelector(".song-artist-name").textContent;
+
+    const isLiked = likedSongs.some(
+      (s) => s.title === title && s.artistName === artist
+    );
+    icon.classList.toggle("heart-icon--active", isLiked);
+  });
 }
 
 // ----------------------------
-// 8. Progress bar + drag
+// Progress bar
 // ----------------------------
-footerAudio.addEventListener("timeupdate", () => {
-  if (!footerAudio.duration) return;
+let isDragging = false;
+let dragX = 0;
 
+function updateProgress() {
+  if (!footerAudio.duration) return;
   const percent = (footerAudio.currentTime / footerAudio.duration) * 100;
   const finalMin = Math.floor(footerAudio.duration / 60);
   const finalSec = Math.floor(footerAudio.duration % 60)
@@ -250,43 +365,38 @@ footerAudio.addEventListener("timeupdate", () => {
   const seconds = Math.floor(footerAudio.currentTime % 60)
     .toString()
     .padStart(2, "0");
-
   footerAudioProgress.style.width = `${percent}%`;
   footerAudioProgCircle.style.left = `${percent}%`;
-
   footerAudioProgTimeDuration.innerText = `${minutes}:${seconds}`;
   footerAudioProgDurationEnd.innerText = `${finalMin}:${finalSec}`;
-});
+}
 
-let isDragging = false;
-let dragX = 0;
+function seekAudio(e) {
+  const width = footerAudioProgWrap.clientWidth;
+  footerAudio.currentTime = (e.offsetX / width) * footerAudio.duration;
+}
 
-footerAudioProgWrap.addEventListener("click", (e) => {
-  const widthOfProgCon = footerAudioProgWrap.clientWidth;
-  footerAudio.currentTime = (e.offsetX / widthOfProgCon) * footerAudio.duration;
-});
-
-footerAudioProgWrap.addEventListener("mousedown", (e) => {
+function startDrag(e) {
   isDragging = true;
   const rect = footerAudioProgWrap.getBoundingClientRect();
   dragX = e.clientX - rect.left;
   updateProgressVisual(dragX);
-});
+}
 
-document.addEventListener("mousemove", (e) => {
+function dragProgress(e) {
   if (!isDragging) return;
   const rect = footerAudioProgWrap.getBoundingClientRect();
   dragX = e.clientX - rect.left;
   updateProgressVisual(dragX);
-});
+}
 
-document.addEventListener("mouseup", () => {
+function endDrag() {
   if (isDragging) {
     const width = footerAudioProgWrap.clientWidth;
     footerAudio.currentTime = (dragX / width) * footerAudio.duration;
   }
   isDragging = false;
-});
+}
 
 function updateProgressVisual(x) {
   const width = footerAudioProgWrap.clientWidth;
@@ -296,9 +406,9 @@ function updateProgressVisual(x) {
 }
 
 // ----------------------------
-// 9. Auto-play next song when current ends
+// Auto-play next
 // ----------------------------
-footerAudio.addEventListener("ended", () => {
+function autoPlayNext() {
   if (upNextQueue.length > 0) {
     const nextSong = upNextQueue.shift();
     playSong(nextSong);
@@ -306,40 +416,36 @@ footerAudio.addEventListener("ended", () => {
     isPlaying = false;
     updateFooter(null);
   }
-});
-
-// ----------------------------
-// 10. Add song to queue function
-// ----------------------------
-function addToQueue(song) {
-  if (!song) return;
-  upNextQueue.push(song);
 }
 
 // ----------------------------
-// 11. Full Screen onclick
+// Fullscreen toggle
 // ----------------------------
-let isFullscreen = false;
-
-fullScreenBtn.addEventListener("click", () => {
+function toggleFullscreen() {
   document.querySelector("header").classList.toggle("hidden");
   document.querySelector("main").classList.toggle("hidden");
-  const footer = document.querySelector("footer");
   const fullScreenIcon = document.querySelector(".footer__maximize-icon");
+
   if (!isFullscreen) {
-    fullScreenIcon.setAttribute(
-      "d",
-      "M520 288L376 288C362.7 288 352 277.3 352 264L352 120C352 110.3 357.8 101.5 366.8 97.8C375.8 94.1 386.1 96.2 393 103L433 143L506.4 69.6C510 66 514.9 64 520 64C525.1 64 530 66 533.7 69.7L570.4 106.4C574 110 576 114.9 576 120C576 125.1 574 130 570.3 133.7L497 207L537 247C543.9 253.9 545.9 264.2 542.2 273.2C538.5 282.2 529.7 288 520 288zM520 352C529.7 352 538.5 357.8 542.2 366.8C545.9 375.8 543.9 386.1 537 393L497 433L570.4 506.4C574 510 576.1 514.9 576.1 520.1C576.1 525.3 574.1 530.1 570.4 533.8L533.7 570.5C530 574 525.1 576 520 576C514.9 576 510 574 506.3 570.3L433 497L393 537C386.1 543.9 375.8 545.9 366.8 542.2C357.8 538.5 352 529.7 352 520L352 376C352 362.7 362.7 352 376 352L520 352zM264 352C277.3 352 288 362.7 288 376L288 520C288 529.7 282.2 538.5 273.2 542.2C264.2 545.9 253.9 543.9 247 537L207 497L133.6 570.4C130 574 125.1 576 120 576C114.9 576 110 574 106.3 570.3L69.7 533.7C66 530 64 525.1 64 520C64 514.9 66 510 69.7 506.3L143 433L103 393C96.1 386.1 94.1 375.8 97.8 366.8C101.5 357.8 110.3 352 120 352L264 352zM120 288C110.3 288 101.5 282.2 97.8 273.2C94.1 264.2 96.2 253.9 103 247L143 207L69.7 133.7C66 130 64 125.1 64 120C64 114.9 66 110 69.7 106.3L106.3 69.7C110 66 114.9 64 120 64C125.1 64 130 66 133.7 69.7L207 143L247 103C253.9 96.1 264.2 94.1 273.2 97.8C282.2 101.5 288 110.3 288 120L288 264C288 277.3 277.3 288 264 288L120 288z"
-    );
     footer.classList.add("footer--fullscreen");
+    body.style.height = "100vh";
+    body.style.display = "flex";
   } else {
-    fullScreenIcon.setAttribute(
-      "d",
-      "M408 64L552 64C565.3 64 576 74.7 576 88L576 232C576 241.7 570.2 250.5 561.2 254.2C552.2 257.9 541.9 255.9 535 249L496 210L409 297C399.6 306.4 384.4 306.4 375.1 297L343.1 265C333.7 255.6 333.7 240.4 343.1 231.1L430.1 144.1L391.1 105.1C384.2 98.2 382.2 87.9 385.9 78.9C389.6 69.9 398.3 64 408 64zM232 576L88 576C74.7 576 64 565.3 64 552L64 408C64 398.3 69.8 389.5 78.8 385.8C87.8 382.1 98.1 384.2 105 391L144 430L231 343C240.4 333.6 255.6 333.6 264.9 343L296.9 375C306.3 384.4 306.3 399.6 296.9 408.9L209.9 495.9L248.9 534.9C255.8 541.8 257.8 552.1 254.1 561.1C250.4 570.1 241.7 576 232 576z" // example for fullscreen icon
-    );
-    console.log("else is working");
     footer.classList.remove("footer--fullscreen");
+    body.style.height = "150vh";
+    body.style.display = "block";
   }
 
   isFullscreen = !isFullscreen;
-});
+}
+
+function getSongDuration(audioSrc, callback) {
+  const audio = new Audio(audioSrc);
+  audio.addEventListener("loadedmetadata", () => {
+    const min = Math.floor(audio.duration / 60);
+    const sec = Math.floor(audio.duration % 60)
+      .toString()
+      .padStart(2, "0");
+    callback(`${min}:${sec}`);
+  });
+}
