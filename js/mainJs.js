@@ -1,20 +1,13 @@
 // ----------------------------
 // 1. Variables & select elements
 // ----------------------------
-let currentlyPlaying = null; // song currently playing
-let upNextQueue = [
-  {
-    title: "Killer Queen",
-    audio: "../audios/queenSongs/Killer Queen (Remastered 2011).mp3",
-    picture: "../img/songPicture/queenPicture/bohemianRhapsody.png",
-    artistName: "Queen",
-  },
-];
+
 let playedHistory = []; // history of played songs
 let isPlaying = false; // play/pause state
 
 const body = document.querySelector("body");
 const footer = document.querySelector(".footer__container");
+const main = document.querySelector("main");
 const footerSongImg = document.querySelector(".footer__song-img");
 const footerSongTitle = document.querySelector(".footer__song-name");
 const footerSongArtist = document.querySelector(".footer__song-artist-name");
@@ -46,7 +39,15 @@ const fullScreenBtn = document.querySelector(".footer__maximize-wrapper");
 let allSongs = [];
 let likedSongs = [];
 let isFullscreen = false;
-
+let currentlyPlaying = null; // song currently playing
+let upNextQueue = [
+  {
+    title: "Killer Queen",
+    audio: "../audios/queenSongs/Killer Queen (Remastered 2011).mp3",
+    picture: "../img/songPicture/queenPicture/bohemianRhapsody.png",
+    artistName: "Queen",
+  },
+];
 // ----------------------------
 // 2. Wait for DOM to load
 // ----------------------------
@@ -153,27 +154,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // After allSongs is populated
   const searchInput = document.querySelector(".header__input");
-  const searchPartContainer = document.querySelector(".search-part-container");
-  const searchContainerDiv = document.querySelector(".search-song-container");
+  const searchButton = document.querySelector(".header__search-icon");
 
-  // Show filtered songs as user types
+  const searchPartContainer = document.querySelector(".search-part-container");
+
   searchInput.addEventListener("input", () => {
+    // If fullscreen, exit fullscreen first
+    if (isFullscreen) toggleFullscreen();
+
+    showMainSection(searchPartContainer);
+    searchPartContainer.style.display = "block"; // ensure block
+
+    const searchDesc = document.querySelector(".search-desc");
     const query = searchInput.value.toLowerCase();
+
     const filteredSongs = allSongs.filter(
       (song) =>
         song.title.toLowerCase().includes(query) ||
         song.artistName.toLowerCase().includes(query)
     );
 
-    // Display filtered songs
+    searchPartContainer.classList.add("active");
+
     displaySongs(filteredSongs);
 
-    // Show or hide search container
-    if (filteredSongs.length > 0) {
-      searchPartContainer.classList.add("active");
-    } else {
-      searchPartContainer.classList.remove("active");
-    }
+    searchDesc.textContent =
+      filteredSongs.length === 0
+        ? "No Songs are found..."
+        : "Discover your favorite tracks by title, artist, album, or genre";
+  });
+
+  queueIcon.addEventListener("click", () => {
+    // If fullscreen, exit fullscreen first
+    if (isFullscreen) toggleFullscreen();
+
+    showMainSection(queueContainer);
+    renderQueue();
   });
 });
 
@@ -212,6 +228,7 @@ function playSong(song) {
 
   updateHeartIcon();
   updatePlayPauseIcon();
+  renderQueue();
 }
 
 function updatePlayPauseIcon() {
@@ -227,8 +244,10 @@ function updatePlayPauseIcon() {
     );
   }
 }
+
 function displaySongs(songs) {
   const searchContainerDiv = document.querySelector(".search-song-container");
+
   if (!searchContainerDiv) return;
   searchContainerDiv.innerHTML = "";
 
@@ -241,9 +260,7 @@ function displaySongs(songs) {
       
       <div class="play-song-btn" data-action="">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
-          <path
-            d="M187.2 100.9C174.8 94.1 159.8 94.4 147.6 101.6C135.4 108.8 128 121.9 128 136L128 504C128 518.1 135.5 531.2 147.6 538.4C159.7 545.6 174.8 545.9 187.2 539.1L523.2 355.1C536 348.1 544 334.6 544 320C544 305.4 536 291.9 523.2 284.9L187.2 100.9z"
-          />
+          <path d="M187.2 100.9C174.8 94.1 159.8 94.4 147.6 101.6C135.4 108.8 128 121.9 128 136L128 504C128 518.1 135.5 531.2 147.6 538.4C159.7 545.6 174.8 545.9 187.2 539.1L523.2 355.1C536 348.1 544 334.6 544 320C544 305.4 536 291.9 523.2 284.9L187.2 100.9z"/>
         </svg>
       </div>
 
@@ -256,15 +273,20 @@ function displaySongs(songs) {
         <div class="song-duration-container">
           <span class="song-duration">0:00</span>
           <svg class="heart-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
-            <path
-              d="M305 151.1L320 171.8L335 151.1C360 116.5 400.2 96 442.9 96C516.4 96 576 155.6 576 229.1L576 231.7C576 343.9 436.1 474.2 363.1 529.9C350.7 539.3 335.5 544 320 544C304.5 544 289.2 539.4 276.9 529.9C203.9 474.2 64 343.9 64 231.7L64 229.1C64 155.6 123.6 96 197.1 96C239.8 96 280 116.5 305 151.1z"
-            />
+            <path d="M305 151.1L320 171.8L335 151.1C360 116.5 400.2 96 442.9 96C516.4 96 576 155.6 576 229.1L576 231.7C576 343.9 436.1 474.2 363.1 529.9C350.7 539.3 335.5 544 320 544C304.5 544 289.2 539.4 276.9 529.9C203.9 474.2 64 343.9 64 231.7L64 229.1C64 155.6 123.6 96 197.1 96C239.8 96 280 116.5 305 151.1z"/>
           </svg>
+
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgb(179, 177, 177)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="add-to-queue-btn"> 
+            <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/>
+            <line x1="12" x2="12" y1="8" y2="16"/>
+            <line x1="8" x2="16" y1="12" y2="12"/>
+          </svg>
+
         </div>
       </div>
     `;
 
-    // Compute actual duration
+    // ----- Duration -----
     const durationSpan = card.querySelector(".song-duration");
     const audio = new Audio(song.audio);
     audio.addEventListener("loadedmetadata", () => {
@@ -275,26 +297,61 @@ function displaySongs(songs) {
       durationSpan.textContent = `${min}:${sec}`;
     });
 
-    // Play only on play button click
+    // ----- Play Button -----
     const playBtn = card.querySelector(".play-song-btn");
     playBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       playSong(song);
     });
 
-    // Heart icon functionality
+    // ----- Heart Icon -----
     const heartIcon = card.querySelector(".heart-icon");
-
-    // Set initial liked state
-    const isLiked = likedSongs.some(
-      (liked) =>
-        liked.title === song.title && liked.artistName === song.artistName
+    // initial state
+    heartIcon.classList.toggle(
+      "heart-icon--active",
+      likedSongs.some(
+        (s) => s.title === song.title && s.artistName === song.artistName
+      )
     );
-    heartIcon.classList.toggle("heart-icon--active", isLiked);
 
     heartIcon.addEventListener("click", (e) => {
-      e.stopPropagation(); // Prevent playing the song
-      toggleLike(song); // <-- updates footer and search hearts
+      e.stopPropagation();
+      const index = likedSongs.findIndex(
+        (s) => s.title === song.title && s.artistName === song.artistName
+      );
+      if (index === -1) likedSongs.push(song);
+      else likedSongs.splice(index, 1);
+
+      // update footer heart
+      updateHeartIcon();
+
+      // update this card heart color
+      heartIcon.classList.toggle(
+        "heart-icon--active",
+        likedSongs.some(
+          (s) => s.title === song.title && s.artistName === song.artistName
+        )
+      );
+    });
+
+    // ----- Add to Queue -----
+    const addToQueueBtn = card.querySelector(".add-to-queue-btn");
+    addToQueueBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+
+      upNextQueue.push(song); // add to queue
+      renderQueue(); // update queue
+
+      // ---- Feedback ----
+      const msg = document.createElement("div");
+      msg.classList.add("queue-feedback");
+      msg.textContent = `"${song.title}" added to queue`;
+      document.body.appendChild(msg);
+
+      // Animate and remove after 1.2s
+      setTimeout(() => {
+        msg.remove();
+      }, 1200);
     });
 
     searchContainerDiv.appendChild(card);
@@ -308,41 +365,6 @@ function updateHeartIcon() {
       (song) =>
         song.title === currentlyPlaying.title &&
         song.artistName === currentlyPlaying.artistName
-    );
-    icon.classList.toggle("heart-icon--active", isLiked);
-  });
-}
-
-function toggleLike(song) {
-  if (!song) return;
-
-  // Add or remove from likedSongs
-  const index = likedSongs.findIndex(
-    (s) => s.title === song.title && s.artistName === song.artistName
-  );
-
-  if (index === -1) likedSongs.push(song);
-  else likedSongs.splice(index, 1);
-
-  // Update footer heart
-  heartIcons.forEach((icon) => {
-    const isLiked = likedSongs.some(
-      (s) =>
-        s.title === currentlyPlaying.title &&
-        s.artistName === currentlyPlaying.artistName
-    );
-    icon.classList.toggle("heart-icon--active", isLiked);
-  });
-
-  // Update hearts in search results
-  const searchHearts = document.querySelectorAll(".song-card .heart-icon");
-  searchHearts.forEach((icon) => {
-    const card = icon.closest(".song-card");
-    const title = card.querySelector(".song-title").textContent;
-    const artist = card.querySelector(".song-artist-name").textContent;
-
-    const isLiked = likedSongs.some(
-      (s) => s.title === title && s.artistName === artist
     );
     icon.classList.toggle("heart-icon--active", isLiked);
   });
@@ -412,9 +434,11 @@ function autoPlayNext() {
   if (upNextQueue.length > 0) {
     const nextSong = upNextQueue.shift();
     playSong(nextSong);
+    renderQueue(); // 🔹 update queue UI immediately
   } else {
     isPlaying = false;
     updateFooter(null);
+    renderQueue();
   }
 }
 
@@ -425,14 +449,15 @@ function toggleFullscreen() {
   document.querySelector("header").classList.toggle("hidden");
   document.querySelector("main").classList.toggle("hidden");
   const fullScreenIcon = document.querySelector(".footer__maximize-icon");
+  const parentFooter = document.querySelector("footer");
 
   if (!isFullscreen) {
     footer.classList.add("footer--fullscreen");
-    body.style.height = "100vh";
     body.style.display = "flex";
+    parentFooter.style.background = "none";
   } else {
     footer.classList.remove("footer--fullscreen");
-    body.style.height = "150vh";
+
     body.style.display = "block";
   }
 
@@ -447,5 +472,99 @@ function getSongDuration(audioSrc, callback) {
       .toString()
       .padStart(2, "0");
     callback(`${min}:${sec}`);
+  });
+}
+
+const queueIcon = document.querySelector(".queue-icon"); // your queue button
+const queueContainer = document.querySelector(".queue-container");
+
+// Function to populate queue
+function renderQueue() {
+  const queueCardsContainer = queueContainer.querySelector(
+    ".queue-card-container"
+  );
+
+  // Clear existing cards
+  queueCardsContainer.innerHTML = "";
+
+  if (upNextQueue.length === 0) {
+    // Show message if queue is empty
+    const emptyMessage = document.createElement("div");
+    emptyMessage.classList.add("queue-empty-text");
+    emptyMessage.textContent = '"No songs in queue"';
+    queueCardsContainer.appendChild(emptyMessage);
+    return;
+  }
+
+  // Loop through upNextQueue
+  upNextQueue.forEach((song, index) => {
+    const card = document.createElement("div");
+    card.classList.add("queue-card");
+
+    card.innerHTML = `
+      <div class="queue-number">${index + 1}</div>
+      <div class="queue-song-container">
+        <img class="queue-song-img" src="${song.picture}" alt="${song.title}" />
+        <div class="queue-song-desc">
+          <span class="queue-song-title">${song.title}</span>
+          <span class="queue-song-artist">${song.artistName}</span>
+        </div>
+      </div>
+      <svg class="x-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+        <path d="M504.6 148.5C515.9 134.9 514.1 114.7 500.5 103.4C486.9 92.1 466.7 93.9 455.4 107.5L320 270L184.6 107.5C173.3 93.9 153.1 92.1 139.5 103.4C125.9 114.7 124.1 134.9 135.4 148.5L278.3 320L135.4 491.5C124.1 505.1 125.9 525.3 139.5 536.6C153.1 547.9 173.3 546.1 184.6 532.5L320 370L455.4 532.5C466.7 546.1 486.9 547.9 500.5 536.6C514.1 525.3 515.9 505.1 504.6 491.5L361.7 320L504.6 148.5z"/>
+      </svg>
+    `;
+
+    // Add click event to x-icon to remove song from queue
+    const xIcon = card.querySelector(".x-icon");
+    xIcon.addEventListener("click", () => {
+      // Remove the song from upNextQueue
+      upNextQueue.splice(index, 1);
+
+      // Re-render queue
+      renderQueue();
+    });
+
+    queueCardsContainer.appendChild(card);
+  });
+}
+
+function toggleLike() {
+  if (!currentlyPlaying) return;
+  const index = likedSongs.findIndex(
+    (song) =>
+      song.title === currentlyPlaying.title &&
+      song.artistName === currentlyPlaying.artistName
+  );
+  if (index === -1) likedSongs.push(currentlyPlaying);
+  else likedSongs.splice(index, 1);
+
+  updateHeartIcon(); // footer
+  updateSongCardsHeart(); // update all visible cards
+}
+
+function showMainSection(sectionToShow, displayType = "flex") {
+  // Hide all main sections
+  const mainSections = document.querySelectorAll("main > div, main > section");
+  mainSections.forEach((sec) => {
+    sec.style.display = "none";
+  });
+
+  // Show the selected section with its correct display type
+  sectionToShow.style.display = displayType;
+}
+
+function updateSongCardsHeart() {
+  const cards = document.querySelectorAll(".song-card");
+  cards.forEach((card) => {
+    const title = card.querySelector(".song-title").textContent;
+    const artist = card.querySelector(".song-artist-name").textContent;
+    const heartIcon = card.querySelector(".heart-icon");
+
+    const isLiked = likedSongs.some(
+      (song) => song.title === title && song.artistName === artist
+    );
+
+    heartIcon.classList.toggle("heart-icon--active", isLiked);
   });
 }
