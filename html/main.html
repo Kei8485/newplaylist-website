@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="../css/normalize.css" />
     <link rel="stylesheet" href="../css/mainStyle.css" />
     <link rel="stylesheet" href="../css/mediaQuery.css" />
+    <link rel="stylesheet" href="../css/aniimation.css" />
   </head>
   <body>
     <svg width="0" height="0">
@@ -80,7 +81,7 @@
     <!-- ^^^^ header part ^^^^ -->
     <main>
       <!-- search div -->
-      <div class="search-part-container">
+      <div class="search-part-container fade-in">
         <div class="search-heading-container">
           <span class="search-heading">Search for Songs</span>
           <span class="search-desc"
@@ -93,11 +94,11 @@
       <!-- search div -->
 
       <!-- upNextCard -->
-      <div class="queue-container">
+      <div class="queue-container fade-in">
         <div class="queue-top-part">
           <span class="queue-heading">Up Next</span>
           <svg
-            class="x-icon"
+            class="x-icon queue-close-btn"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 640 640"
           >
@@ -110,10 +111,143 @@
         <div class="queue-card-container"></div>
       </div>
       <!-- upNextCard -->
+
+      <!-- menu bar part -->
+      <div class="main__nav-menu-container">
+        <ul class="main__list-menu">
+          <li class="main__list-item" data-target="home">
+            <svg
+              class="header__icon"
+              xmlns="http://www.w3.org/2000/svg"
+              ad
+              viewBox="0 0 640 640"
+            >
+              <path
+                d="M341.8 72.6C329.5 61.2 310.5 61.2 298.3 72.6L74.3 280.6C64.7 289.6 61.5 303.5 66.3 315.7C71.1 327.9 82.8 336 96 336L112 336L112 512C112 547.3 140.7 576 176 576L464 576C499.3 576 528 547.3 528 512L528 336L544 336C557.2 336 569 327.9 573.8 315.7C578.6 303.5 575.4 289.5 565.8 280.6L341.8 72.6zM304 384L336 384C362.5 384 384 405.5 384 432L384 528L256 528L256 432C256 405.5 277.5 384 304 384z"
+                fill="url(#iconGradient)"
+              />
+            </svg>
+            <div class="main__nav-info main__nav-home">
+              <div class="main__nav-name">Home</div>
+              <div class="main__nav-desc">Your personalized music feed</div>
+            </div>
+          </li>
+
+          <li class="main__list-item" data-target="genre">
+            <svg
+              class="header__icon header__icon--active"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 640 640"
+            >
+              <path
+                d="M532 71C539.6 77.1 544 86.3 544 96L544 400C544 444.2 501 480 448 480C395 480 352 444.2 352 400C352 355.8 395 320 448 320C459.2 320 470 321.6 480 324.6L480 207.9L256 257.7L256 464C256 508.2 213 544 160 544C107 544 64 508.2 64 464C64 419.8 107 384 160 384C171.2 384 182 385.6 192 388.6L192 160C192 145 202.4 132 217.1 128.8L505.1 64.8C514.6 62.7 524.5 65 532.1 71.1z"
+                fill="url(#iconGradient)"
+              />
+            </svg>
+            <div class="main__nav-info">
+              <div class="main__nav-name">Genres</div>
+              <div class="main__nav-desc">Rock, Pop, OPM, Kpop and more</div>
+            </div>
+          </li>
+
+          <li class="main__list-item" data-target="artist">
+            <svg
+              class="header__icon header__icon--active"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 640 640"
+            >
+              <path
+                fill="url(#iconGradient)"
+                d="M242.646,141.06L76.41,324.636c-15.446,17.081-14.804,43.256,1.48,59.531l5.742,5.731
+       c16.274,16.284,42.468,16.946,59.54,1.49l183.576-166.237c-19.471-5.401-37.855-15.705-53.136-30.975
+       C258.351,178.906,248.037,160.531,242.646,141.06z"
+              ></path>
+
+              <path
+                fill="url(#iconGradient)"
+                d="M284.185,456.329l-0.248-0.249c0,0,0,0-0.021-0.01l-0.103-0.114c-0.269-0.217-0.456-0.382-0.58-0.528
+       c-15.27-14.898-35.104-22.388-54.916-22.388c-20.072,0-40.277,7.698-55.599,23.03l-22.285,22.264
+       c-10.056,10.077-23.144,15.064-36.334,15.064c-13.16,0.042-26.258-4.965-36.314-15.042c0,0,0,0-0.021-0.021
+       c-10.035-10.035-15.042-23.112-15.042-36.292c0-13.201,5.008-26.279,15.064-36.356l-13.139-13.128
+       c-26.144,26.143-27.22,67.796-3.332,95.233l-0.062,0.332l3.394,3.383c6.828,6.828,14.711,11.918,23.154,15.364
+       c8.401,3.434,17.36,5.132,26.299,5.132c17.868,0,35.838-6.88,49.474-20.506l22.285-22.295
+       c11.773-11.722,27.065-17.536,42.459-17.557c13.605,0,27.168,4.572,38.238,13.74l-0.766,2.121l5.979,2.803
+       c9.85,10.316,15.354,23.216,16.399,36.5l18.529-1.468c-1.427-17.826-8.938-35.279-22.471-48.895
+       C284.206,456.401,284.206,456.34,284.185,456.329z"
+              ></path>
+
+              <path
+                fill="url(#iconGradient)"
+                d="M436.807,31.001C395.94-9.843,329.976-10.34,288.562,29.584c-0.549,0.445-1.024,0.921-1.521,1.418
+       c-4.128,4.138-7.821,8.505-11.111,13.119c-29.827,41.393-26.112,99.424,11.111,136.658c37.235,37.235,95.244,40.918,136.607,11.101
+       c4.594-3.269,9.011-6.994,13.139-11.132c0.497-0.497,0.994-0.983,1.448-1.542C478.149,137.77,477.673,71.858,436.807,31.001z
+       M361.904,182.795c-19.74-0.02-39.387-7.469-54.399-22.491c-15.022-15.022-22.492-34.679-22.512-54.419
+       c0-12.539,3.042-25.12,9.146-36.397c14.422,18.985,30.686,37.607,48.635,55.558c17.939,17.95,36.572,34.214,55.516,48.688
+       C386.961,179.816,374.463,182.795,361.904,182.795z
+       M416.342,160.304c-0.703,0.714-1.448,1.387-2.162,2.049
+       c-19.884-14.774-39.49-31.658-58.278-50.447c-18.808-18.808-35.693-38.382-50.487-58.268c0.683-0.745,1.356-1.49,2.069-2.193
+       c15.033-14.971,34.68-22.471,54.44-22.471c19.74,0.01,39.387,7.47,54.419,22.502c15.002,15.012,22.461,34.648,22.492,54.388
+       C438.835,125.625,431.344,145.292,416.342,160.304z"
+              ></path>
+            </svg>
+
+            <div class="main__nav-info">
+              <div class="main__nav-name">Artists</div>
+              <div class="main__nav-desc">Listen to your favorite artists</div>
+            </div>
+          </li>
+
+          <li class="main__list-item" data-target="favorites">
+            <svg
+              class="header__icon header__icon--active"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 640 640"
+            >
+              <path
+                d="M442.9 144C415.6 144 389.9 157.1 373.9 179.2L339.5 226.8C335 233 327.8 236.7 320.1 236.7C312.4 236.7 305.2 233 300.7 226.8L266.3 179.2C250.3 157.1 224.6 144 197.3 144C150.3 144 112.2 182.1 112.2 229.1C112.2 279 144.2 327.5 180.3 371.4C221.4 421.4 271.7 465.4 306.2 491.7C309.4 494.1 314.1 495.9 320.2 495.9C326.3 495.9 331 494.1 334.2 491.7C368.7 465.4 419 421.3 460.1 371.4C496.3 327.5 528.2 279 528.2 229.1C528.2 182.1 490.1 144 443.1 144zM335 151.1C360 116.5 400.2 96 442.9 96C516.4 96 576 155.6 576 229.1C576 297.7 533.1 358 496.9 401.9C452.8 455.5 399.6 502 363.1 529.8C350.8 539.2 335.6 543.9 320 543.9C304.4 543.9 289.2 539.2 276.9 529.8C240.4 502 187.2 455.5 143.1 402C106.9 358.1 64 297.7 64 229.1C64 155.6 123.6 96 197.1 96C239.8 96 280 116.5 305 151.1L320 171.8L335 151.1z"
+                fill="url(#iconGradient)"
+              />
+            </svg>
+            <div class="main__nav-info">
+              <div class="main__nav-name">Favorites</div>
+              <div class="main__nav-desc">Your liked songs and albums</div>
+            </div>
+          </li>
+
+          <li class="main__list-item" data-target="playlist">
+            <svg
+              class="header__icon header__icon--active"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 640 640"
+            >
+              <path
+                d="M192 64C156.7 64 128 92.7 128 128L128 544C128 555.5 134.2 566.2 144.2 571.8C154.2 577.4 166.5 577.3 176.4 571.4L320 485.3L463.5 571.4C473.4 577.3 485.7 577.5 495.7 571.8C505.7 566.1 512 555.5 512 544L512 128C512 92.7 483.3 64 448 64L192 64z"
+                fill="url(#iconGradient)"
+              />
+            </svg>
+            <div class="main__nav-info">
+              <div class="main__nav-name">Playlist</div>
+              <div class="main__nav-desc">Playlist that you saved</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <!-- menu bar part -->
+
+      <!-- Home part -->
+      <div class="main__home-container fade-in main__home-container--active">
+        <h1 class="main__recent-heading">Recent Playlists</h1>
+        <div class="main__recent-playlist-container"></div>
+      </div>
+      <!-- Home Part -->
+
+      <!--  genre part -->
+
+      <!-- genre part -->
     </main>
 
     <!-- Footer -->
-    <footer>
+    <footer class="slide-top">
       <div class="footer__container footer__container--active">
         <div class="footer__songtitle">
           <img class="footer__song-img" src="" alt="song img" />

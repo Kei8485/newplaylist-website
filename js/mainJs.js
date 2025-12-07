@@ -6,6 +6,7 @@ let playedHistory = []; // history of played songs
 let isPlaying = false; // play/pause state
 
 const body = document.querySelector("body");
+const footerParent = document.querySelector("footer");
 const footer = document.querySelector(".footer__container");
 const main = document.querySelector("main");
 const footerSongImg = document.querySelector(".footer__song-img");
@@ -38,6 +39,8 @@ const fullScreenBtn = document.querySelector(".footer__maximize-wrapper");
 
 let allSongs = [];
 let likedSongs = [];
+let recentPlayed = []; // will hold unique, last 6 songs
+
 let isFullscreen = false;
 let currentlyPlaying = null; // song currently playing
 let upNextQueue = [
@@ -163,6 +166,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (isFullscreen) toggleFullscreen();
 
     showMainSection(searchPartContainer);
+    searchPartContainer.classList.add("active");
+
     searchPartContainer.style.display = "block"; // ensure block
 
     const searchDesc = document.querySelector(".search-desc");
@@ -174,8 +179,6 @@ document.addEventListener("DOMContentLoaded", () => {
         song.artistName.toLowerCase().includes(query)
     );
 
-    searchPartContainer.classList.add("active");
-
     displaySongs(filteredSongs);
 
     searchDesc.textContent =
@@ -185,11 +188,57 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   queueIcon.addEventListener("click", () => {
-    // If fullscreen, exit fullscreen first
     if (isFullscreen) toggleFullscreen();
-
     showMainSection(queueContainer);
     renderQueue();
+  });
+
+  // nav part
+  const menuIcon = document.getElementById("menuIcon");
+  const navMenu = document.querySelector(".main__nav-menu-container");
+  const searchIcon = document.getElementById("searchIcon");
+  const views = document.querySelectorAll(".fade-in");
+  const navItems = document.querySelectorAll(".main__list-item");
+
+  menuIcon.addEventListener("click", (e) => {
+    navMenu.classList.toggle("main__nav--active");
+    navMenu.style.transitionDuration = "1s";
+    e.stopPropagation();
+  });
+
+  navMenu.addEventListener("click", (e) => {
+    e.stopPropagation();
+  });
+
+  document.addEventListener("click", () => {
+    if (navMenu.classList.contains("main__nav--active")) {
+      navMenu.classList.remove("main__nav--active");
+    }
+  });
+
+  navItems.forEach((item) => {
+    item.addEventListener("click", () => {
+      const target = item.dataset.target;
+
+      const selectedView = document.querySelector(`.main__${target}-container`);
+
+      if (selectedView) {
+        showMainSection(selectedView);
+      }
+
+      // close nav on mobile
+      if (navMenu.classList.contains("main__nav--active")) {
+        navMenu.classList.remove("main__nav--active");
+        navMenu.style.transitionDuration = "2.5s";
+      }
+    });
+  });
+
+  const queueCloseBtn = document.querySelector(".queue-close-btn");
+
+  queueCloseBtn.addEventListener("click", () => {
+    const homeContainer = document.querySelector(".main__home-container");
+    showMainSection(homeContainer);
   });
 });
 
@@ -225,6 +274,7 @@ function playSong(song) {
   ) {
     playedHistory.push(song);
   }
+  updateRecentPlayed(song);
 
   updateHeartIcon();
   updatePlayPauseIcon();
@@ -247,7 +297,6 @@ function updatePlayPauseIcon() {
 
 function displaySongs(songs) {
   const searchContainerDiv = document.querySelector(".search-song-container");
-
   if (!searchContainerDiv) return;
   searchContainerDiv.innerHTML = "";
 
@@ -302,6 +351,7 @@ function displaySongs(songs) {
     playBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       playSong(song);
+      footerParent.style.display = "block";
     });
 
     // ----- Heart Icon -----
@@ -539,19 +589,20 @@ function toggleLike() {
   if (index === -1) likedSongs.push(currentlyPlaying);
   else likedSongs.splice(index, 1);
 
-  updateHeartIcon(); // footer
-  updateSongCardsHeart(); // update all visible cards
+  updateHeartIcon();
+  updateSongCardsHeart();
 }
 
-function showMainSection(sectionToShow, displayType = "flex") {
-  // Hide all main sections
-  const mainSections = document.querySelectorAll("main > div, main > section");
-  mainSections.forEach((sec) => {
+function showMainSection(sectionToShow) {
+  const allSections = document.querySelectorAll(
+    ".main__home-container, .queue-container, .main__search-container, .search-part-container"
+  );
+
+  allSections.forEach((sec) => {
     sec.style.display = "none";
   });
 
-  // Show the selected section with its correct display type
-  sectionToShow.style.display = displayType;
+  sectionToShow.style.display = "block";
 }
 
 function updateSongCardsHeart() {
@@ -566,5 +617,56 @@ function updateSongCardsHeart() {
     );
 
     heartIcon.classList.toggle("heart-icon--active", isLiked);
+  });
+}
+
+function updateRecentPlayed(song) {
+  if (!song) return;
+
+  // remove if already exists
+  recentPlayed = recentPlayed.filter(
+    (s) => !(s.title === song.title && s.artistName === song.artistName)
+  );
+
+  // add song to the top
+  recentPlayed.unshift(song);
+
+  // keep only 6 items maximum
+  if (recentPlayed.length > 6) {
+    recentPlayed.pop();
+  }
+
+  renderRecentPlayed();
+}
+
+function renderRecentPlayed() {
+  const container = document.querySelector(".main__recent-playlist-container");
+  container.innerHTML = "";
+
+  recentPlayed.forEach((song) => {
+    const card = document.createElement("div");
+    card.classList.add("main__recent-card");
+
+    card.innerHTML = `
+      <img
+        src="${song.picture}"
+        class="main__recent-img"
+        alt="${song.title}"
+      />
+      <h5 class="main__artist-name">${song.title}</h5>
+
+      <div class="play-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+          <path d="M187.2 100.9C174.8 94.1 159.8 94.4 147.6 101.6C135.4 108.8 128 121.9 128 136L128 504C128 518.1 135.5 531.2 147.6 538.4C159.7 545.6 174.8 545.9 187.2 539.1L523.2 355.1C536 348.1 544 334.6 544 320C544 305.4 536 291.9 523.2 284.9L187.2 100.9z"></path>
+        </svg>
+      </div>
+    `;
+
+    // clicking plays the song
+    card.addEventListener("click", () => {
+      playSong(song);
+    });
+
+    container.appendChild(card);
   });
 }

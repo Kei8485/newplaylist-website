@@ -67,14 +67,13 @@ header {
   top: 0;
   left: 0;
   padding: 15px;
-  z-index: 1000;
   background: rgba(7, 6, 14, 0.7);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   box-shadow: 0 15px 20px rgba(102, 22, 85, 0.185);
   width: 100%;
   justify-content: center;
-  z-index: 10000;
+  z-index: 2;
 }
 
 .header__container {
@@ -136,12 +135,9 @@ header {
   background-color: transparent;
   border-radius: 100px;
   overflow: hidden;
-
   width: var(--size);
   max-width: 100%;
   transition: width 0.5s;
-
-  /* Removed border entirely */
   z-index: 1;
 }
 
@@ -215,11 +211,12 @@ header {
 
 /* footer */
 footer {
+  display: none;
   position: fixed;
-  bottom: 0;
+  bottom: -100px;
   left: 0;
+  z-index: 2;
   width: 100%;
-  z-index: 1000;
   background: rgba(12, 12, 12, 0.384);
   backdrop-filter: blur(15px);
 }
@@ -245,7 +242,7 @@ footer {
 }
 
 .footer__audio {
-  z-index: 10;
+  z-index: 1;
 }
 
 .audio-btn {
@@ -590,14 +587,16 @@ footer {
 /* main */
 main {
   margin-top: 60px;
-  display: flex;
   justify-content: center;
+  z-index: 1;
 }
 
 /* search container sa main */
 .search-part-container {
   width: 90%;
   display: none;
+  align-self: center;
+  justify-self: center;
   opacity: 0;
   transform: translateY(20px);
   transition: opacity 1.25s ease, transform 1.25s ease, visibility 0s 1.25s;
@@ -811,6 +810,7 @@ main {
 .queue-container {
   margin-top: 20px;
   display: none;
+  justify-self: center;
   width: 60%;
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
@@ -818,9 +818,10 @@ main {
   border-radius: 15px;
   padding: 5px;
   flex-direction: column;
-  align-items: center; /* fill container width */
+  align-items: center;
   gap: 10px;
   margin-bottom: 200px;
+  z-index: 5;
 }
 
 .queue-top-part {
@@ -828,12 +829,13 @@ main {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 10px;
+  margin: 0 auto;
+  padding-top: 10px;
 }
 
 .queue-feedback {
   position: fixed;
-  bottom: 200px; /* above footer */
+  bottom: 150px; /* above footer */
   left: 50%;
   transform: translateX(-50%);
   background: rgba(0, 0, 0, 0.85);
@@ -842,29 +844,31 @@ main {
   border-radius: 8px;
   font-size: 1.4rem;
   opacity: 0;
-  animation: fadeInOut 0.2s forwards;
+  animation: popSlideFade 2s linear;
   z-index: 9999;
 }
 
-@keyframes fadeInOut {
+@keyframes popSlideFade {
   0% {
     opacity: 0;
-    transform: translateX(-50%) translateY(20px);
+    transform: translateX(-50%) translateY(25px);
   }
-  10% {
+
+  20% {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
   }
-  90% {
+
+  60% {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
   }
+
   100% {
     opacity: 0;
-    transform: translateX(-50%) translateY(20px);
+    transform: translateX(-50%) translateY(30px);
   }
 }
-
 .queue-heading {
   font-size: 2rem;
   color: white;
@@ -873,7 +877,9 @@ main {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin: 3px 0;
+  margin: 5px 0;
+  width: 95%;
+  justify-self: center;
 }
 
 .x-icon {
@@ -905,7 +911,6 @@ main {
 }
 
 .queue-card {
-  margin-left: 10px;
   display: flex;
   align-items: center;
   justify-content: space-around;
@@ -992,4 +997,272 @@ main {
   margin: 10px;
 }
 
-/* main */
+/* menu bar part */
+/* nav menu */
+.main__nav-menu-container {
+  position: fixed;
+  border-radius: 8px;
+  height: 100%;
+  width: 60%;
+  padding: 0;
+  left: -100%;
+  top: 60px;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+  background: rgba(15, 10, 25, 0.541);
+  transition: left 1s cubic-bezier(0.25, 1, 0.3, 1), box-shadow 1s ease-in-out,
+    background 0.4s ease;
+  backdrop-filter: blur(12px);
+  z-index: 100;
+  transform: translateZ(0);
+}
+
+/* active (slide-in) state */
+.main__nav--active {
+  display: block;
+  left: 0;
+  box-shadow: 6px 0 25px rgba(0, 0, 0, 0.247);
+}
+
+.main__list-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  padding: 0;
+  margin-top: 10px;
+}
+
+.main__list-item {
+  margin-left: 10px;
+  display: flex;
+  width: 90%;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 1rem;
+  transition: all 0.4s ease;
+  cursor: pointer;
+  gap: 10px;
+}
+
+.main__list-item:active {
+  transform: scale(1.1);
+  filter: brightness(1.2);
+}
+
+.main__list-item::after {
+  content: "";
+  position: absolute;
+  top: -50px;
+  left: -75px;
+  width: 50px;
+  height: 155px;
+  background: linear-gradient(135deg, #fff, rgba(255, 255, 255, 0.3));
+  opacity: 0.2;
+  transform: rotate(35deg);
+  transition: all 600ms cubic-bezier(0.19, 1, 0.22, 1);
+  z-index: 1;
+}
+
+.main__list-item:hover {
+  border-color: #a02245;
+  box-shadow: 0 0 10px rgba(160, 34, 69, 0.6), 0 0 20px rgba(94, 59, 132, 0.4);
+  background: linear-gradient(
+    135deg,
+    rgba(94, 59, 132, 0.2),
+    rgba(160, 34, 69, 0.2)
+  );
+}
+
+.main__list-item:hover::after {
+  left: 120%;
+  opacity: 0.4;
+}
+
+.main__nav-info {
+  position: relative;
+  z-index: 1000;
+}
+
+.main__nav-name,
+.main__nav-desc {
+  color: #fff;
+  transition: all 0.4s ease;
+}
+
+.main__list-item:hover .main__nav-name,
+.main__list-item:hover .main__nav-desc {
+  background: linear-gradient(270deg, #5e3b84, #a02245, #7c2b61, #5e3b84);
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientMove 3s ease infinite;
+}
+
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.main__nav-name {
+  color: white;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+}
+
+.main__nav-desc {
+  color: rgb(209, 209, 209);
+  transition: all 0.3s ease;
+}
+
+/* home part */
+/* home */
+.main__home-container {
+  position: relative;
+  max-width: 90%;
+  margin: 0 auto;
+  display: none;
+  flex-direction: column;
+  z-index: 1;
+}
+
+/* displays for the showing the nav */
+.fade-in {
+  display: none;
+  animation: fade-in 2s cubic-bezier(0.39, 0.575, 0.565, 1) both;
+}
+.fade-in.main__home-container--active {
+  display: block;
+}
+
+.fade-in.main__artist-container--active {
+  display: block;
+}
+
+.fade-in.main__genre-container--active {
+  display: block;
+}
+
+.fade-in.main__favorites-container--active {
+  display: block;
+}
+
+.fade-in.main__playlist-container--active {
+  display: block;
+}
+
+/* displays for the showing the nav */
+
+.main__recent-playlist-container {
+  margin: 10px 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
+  gap: 10px;
+}
+@keyframes spinGlow {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.main__recent-playlist-container .play-btn {
+  width: 30px;
+  height: 30px;
+  padding: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transform: scale(0.6);
+  pointer-events: none;
+}
+
+.main__recent-playlist-container .play-btn:hover {
+  transform: scale(1.2);
+  filter: brightness(1.2);
+}
+
+.main__recent-card:hover .play-btn {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+.main__recent-heading {
+  margin-top: 15px;
+}
+
+.main__recent-card {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 10px;
+  background: rgba(77, 36, 66, 0.205);
+  border: 1px solid rgba(109, 100, 100, 0.137);
+  border-radius: 10px;
+  max-width: 170px;
+  padding: 6px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s ease;
+}
+
+/* ✨ Hover effect */
+.main__recent-card:hover {
+  box-shadow: 0 0 10px rgba(160, 34, 69, 0.6), 0 0 20px rgba(94, 59, 132, 0.4);
+  background: linear-gradient(
+    135deg,
+    rgba(94, 59, 132, 0.2),
+    rgba(160, 34, 69, 0.2)
+  );
+  transform: translateY(-2px);
+}
+
+.main__recent-img {
+  height: 45px;
+  width: 45px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.main__artist-name {
+  align-self: center;
+  justify-self: center;
+  font-size: 1.2rem;
+  flex: 1 0 0;
+  color: #fff;
+  transition: color 0.3s ease;
+}
+
+.main__recent-card:hover .main__artist-name {
+  background: linear-gradient(270deg, #5e3b84, #a02245, #7c2b61, #5e3b84);
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientMove 3s ease infinite;
+}
+
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
