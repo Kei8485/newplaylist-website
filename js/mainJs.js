@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
     .then((data) => {
       // Load first song for footer
       displayGenresFromSongs(data.artists);
-
+      displayArtists(data.artists);
       if (data.artists.length > 0 && data.artists[0].songs.length > 0) {
         const artist = data.artists[0];
         const song = {
@@ -99,7 +99,13 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       });
 
-      // Display all songs in search
+      likedSongs = allSongs.filter(
+        (song) => song.title === "Bohemian Rhapsody"
+      );
+      likedSongs[0].isFavorite = true;
+
+      displayLikedSongs();
+
       displaySongs(allSongs);
     })
     .catch((error) => {
@@ -404,7 +410,7 @@ function displaySongs(songs, genre = null, container = null) {
     card.innerHTML = `
       <img class="song-img" src="${song.picture}" alt="${song.title}" />
       
-      <div class="play-song-btn" data-action="">
+      <div class="play-song-btn">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
           <path d="M187.2 100.9C174.8 94.1 159.8 94.4 147.6 101.6C135.4 108.8 128 121.9 128 136L128 504C128 518.1 135.5 531.2 147.6 538.4C159.7 545.6 174.8 545.9 187.2 539.1L523.2 355.1C536 348.1 544 334.6 544 320C544 305.4 536 291.9 523.2 284.9L187.2 100.9z"/>
         </svg>
@@ -418,6 +424,7 @@ function displaySongs(songs, genre = null, container = null) {
       <div class="song-desc-lower-part">
         <div class="song-duration-container">
           <span class="song-duration">0:00</span>
+
           <svg class="heart-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
             <path d="M305 151.1L320 171.8L335 151.1C360 116.5 400.2 96 442.9 96C516.4 96 576 155.6 576 229.1L576 231.7C576 343.9 436.1 474.2 363.1 529.9C350.7 539.3 335.5 544 320 544C304.5 544 289.2 539.4 276.9 529.9C203.9 474.2 64 343.9 64 231.7L64 229.1C64 155.6 123.6 96 197.1 96C239.8 96 280 116.5 305 151.1z"/>
           </svg>
@@ -427,6 +434,13 @@ function displaySongs(songs, genre = null, container = null) {
             <line x1="12" x2="12" y1="8" y2="16"/>
             <line x1="8" x2="16" y1="12" y2="12"/>
           </svg>
+
+          <div class="spinner">
+            <div class="rect1"></div>
+            <div class="rect2"></div>
+            <div class="rect3"></div>
+          </div>
+
         </div>
       </div>
     `;
@@ -442,47 +456,50 @@ function displaySongs(songs, genre = null, container = null) {
       durationSpan.textContent = `${min}:${sec}`;
     });
 
+    // ----- Spinner -----
+    const spinner = card.querySelector(".spinner");
+    spinner.classList.remove("active");
+    spinner.style.filter = "grayscale(100%)";
+
     // ----- Play Button -----
     const playBtn = card.querySelector(".play-song-btn");
     playBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      playSong(song);
-      footerParent.style.display = "block";
+      if (typeof playSong === "function") playSong(song);
+      if (footerParent) footerParent.style.display = "block";
+
+      // deactivate all spinners
+      document.querySelectorAll(".spinner").forEach((s) => {
+        s.classList.remove("active");
+        s.style.filter = "grayscale(100%)";
+      });
+
+      // activate this spinner
+      spinner.classList.add("active");
+      spinner.style.filter = "none";
     });
 
     // ----- Heart Icon -----
+
     const heartIcon = card.querySelector(".heart-icon");
-    heartIcon.classList.toggle(
-      "heart-icon--active",
-      likedSongs.some(
-        (s) => s.title === song.title && s.artistName === song.artistName
-      )
-    );
+
+    // Set initial active state
+    heartIcon.classList.toggle("heart-icon--active", song.isFavorite);
+
+    // Click event to toggle like
     heartIcon.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const index = likedSongs.findIndex(
-        (s) => s.title === song.title && s.artistName === song.artistName
-      );
-      if (index === -1) likedSongs.push(song);
-      else likedSongs.splice(index, 1);
-
-      updateHeartIcon();
-
-      heartIcon.classList.toggle(
-        "heart-icon--active",
-        likedSongs.some(
-          (s) => s.title === song.title && s.artistName === song.artistName
-        )
-      );
+      e.stopPropagation(); // prevent any parent click handlers
+      currentlyPlaying = song; // tell toggleLike which song
+      toggleLike(); // updates likedSongs, isFavorite, hearts
+      displayLikedSongs(); // re-render liked songs section
     });
 
     // ----- Add to Queue -----
     const addToQueueBtn = card.querySelector(".add-to-queue-btn");
     addToQueueBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-
-      upNextQueue.push(song);
-      renderQueue();
+      if (upNextQueue) upNextQueue.push(song);
+      if (typeof renderQueue === "function") renderQueue();
 
       const msg = document.createElement("div");
       msg.classList.add("queue-feedback");
@@ -594,7 +611,6 @@ function toggleFullscreen() {
   if (!isFullscreen) {
     footer.classList.add("footer--fullscreen");
     body.style.display = "flex";
-    parentFooter.style.background = "none";
   } else {
     footer.classList.remove("footer--fullscreen");
 
@@ -671,21 +687,27 @@ function renderQueue() {
 
 function toggleLike() {
   if (!currentlyPlaying) return;
-  const index = likedSongs.findIndex(
+
+  const songInAll = allSongs.find(
     (song) =>
       song.title === currentlyPlaying.title &&
       song.artistName === currentlyPlaying.artistName
   );
-  if (index === -1) likedSongs.push(currentlyPlaying);
-  else likedSongs.splice(index, 1);
+  if (!songInAll) return;
 
-  updateHeartIcon();
-  updateSongCardsHeart();
+  // Toggle favorite
+  songInAll.isFavorite = !songInAll.isFavorite;
+
+  // Update likedSongs array
+  likedSongs = allSongs.filter((song) => song.isFavorite);
+
+  updateHeartIcon(); // footer heart
+  updateSongCardsHeart(); // main song list hearts
 }
 
 function showMainSection(sectionToShow) {
   const allSections = document.querySelectorAll(
-    ".main__home-container, .queue-container, .main__search-container, .search-part-container, .main__genre-container"
+    ".main__home-container, .queue-container, .main__search-container, .search-part-container, .main__genre-container, .main__artist-container"
   );
 
   allSections.forEach((sec) => {
@@ -755,6 +777,130 @@ function renderRecentPlayed() {
 
     card.addEventListener("click", () => {
       playSong(song);
+    });
+
+    container.appendChild(card);
+  });
+}
+
+function displayArtists(artists) {
+  const container = document.querySelector(".main__artist-container");
+  const heading = container.querySelector(".main__artist-heading");
+  const grid = container.querySelector(".main__genre-heading-grid");
+
+  // Ensure pick container exists
+  let pickContainer = container.querySelector(".main__artist-pick");
+  if (!pickContainer) {
+    pickContainer = document.createElement("div");
+    pickContainer.classList.add("main__artist-pick");
+    container.appendChild(pickContainer);
+  }
+
+  if (!grid) return;
+  grid.innerHTML = ""; // Clear grid
+
+  artists.forEach((artist) => {
+    const card = document.createElement("div");
+    card.classList.add("main__artist-card");
+
+    card.innerHTML = `
+      <div class="main__artist-card-inner">
+        <div class="main__artist-img">
+          <img class="artist-img" src="${artist.songs[0].picture}" alt="${artist.name}" />
+          <div class="play-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+              <path d="M187.2 100.9C174.8 94.1 159.8 94.4 147.6 101.6C135.4 108.8 128 121.9 128 136L128 504C128 518.1 135.5 531.2 147.6 538.4C159.7 545.6 174.8 545.9 187.2 539.1L523.2 355.1C536 348.1 544 334.6 544 320C544 305.4 536 291.9 523.2 284.9L187.2 100.9z"/>
+            </svg>
+          </div>
+        </div>
+        <h2 class="main__artist-name">${artist.name}</h2>
+      </div>
+    `;
+
+    card.addEventListener("click", () => {
+      grid.style.display = "none"; // hide artist grid
+      pickContainer.classList.add("main__genre-pick--active"); // show songs
+      heading.textContent = `${artist.name.toUpperCase()} SONGS`;
+
+      // Add back button dynamically if not present
+      let topPart = container.querySelector(".artist-top-part");
+      if (!topPart) {
+        topPart = document.createElement("div");
+        topPart.classList.add("artist-top-part");
+        heading.before(topPart);
+      }
+
+      let backBtn = topPart.querySelector(".back-btn");
+      if (!backBtn) {
+        backBtn = document.createElement("button");
+        backBtn.classList.add("back-btn");
+        backBtn.innerHTML = `
+          <svg class="back-btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+            <path d="M73.4 297.4C60.9 309.9 60.9 330.2 73.4 342.7L233.4 502.7C245.9 515.2 266.2 515.2 278.7 502.7C291.2 490.2 291.2 469.9 278.7 457.4L173.3 352L544 352C561.7 352 576 337.7 576 320C576 302.3 561.7 288 544 288L173.3 288L278.7 182.6C291.2 170.1 291.2 149.8 278.7 137.3C266.2 124.8 245.9 124.8 233.4 137.3L73.4 297.3z"/>
+          </svg>`;
+        topPart.prepend(backBtn);
+
+        backBtn.addEventListener("click", () => {
+          pickContainer.classList.remove("main__genre-pick--active");
+          grid.style.display = "grid";
+          heading.textContent = "Listen to your favorite artist here!";
+          backBtn.remove();
+          pickContainer.innerHTML = "";
+        });
+      }
+
+      // Display the artist's songs using your reusable function
+      displaySongs(
+        artist.songs.map((song) => ({
+          ...song,
+          artistName: artist.name,
+          isFavorite: likedSongs.some(
+            (likedSong) =>
+              likedSong.title === song.title &&
+              likedSong.artistName === artist.name
+          ),
+        })),
+        artist.name,
+        pickContainer
+      );
+    });
+
+    grid.appendChild(card);
+  });
+}
+
+function displayLikedSongs() {
+  const container = document.querySelector(".main__favorites-container");
+  container.innerHTML = `<h1 class="main__favorites-heading">Your Liked Songs</h1>`;
+
+  likedSongs.forEach((song) => {
+    const card = document.createElement("div");
+    card.classList.add("main__favorites-card");
+
+    card.innerHTML = `
+      <svg class="heart-icon--active" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+        <path d="M305 151.1L320 171.8L335 151.1C360 116.5 400.2 96 442.9 96C516.4 96 576 155.6 576 229.1L576 231.7C576 343.9 436.1 474.2 363.1 529.9C350.7 539.3 335.5 544 320 544C304.5 544 289.2 539.4 276.9 529.9C203.9 474.2 64 343.9 64 231.7L64 229.1C64 155.6 123.6 96 197.1 96C239.8 96 280 116.5 305 151.1z"/>
+      </svg>
+      <div class="main__fav-song-img-container">
+        <img class="main__fav-song-img" src="${song.picture}" alt="${song.title}" />
+        <h5 class="main__fav-song-title">${song.title}</h5>
+      </div>
+      <div class="main__fav-song-artist-container">
+        <h5 class="main__fav-song-artist">${song.artistName}</h5>
+      </div>
+      <div class="play-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+          <path d="M187.2 100.9C174.8 94.1 159.8 94.4 147.6 101.6C135.4 108.8 128 121.9 128 136L128 504C128 518.1 135.5 531.2 147.6 538.4C159.7 545.6 174.8 545.9 187.2 539.1L523.2 355.1C536 348.1 544 334.6 544 320C544 305.4 536 291.9 523.2 284.9L187.2 100.9z"/>
+        </svg>
+      </div>
+    `;
+
+    // Add click event to heart in this card
+    const heartIcon = card.querySelector(".heart-icon");
+    heartIcon.addEventListener("click", () => {
+      currentlyPlaying = song; // set current song
+      toggleLike(); // toggle favorite
+      displayLikedSongs(); // update liked songs section
     });
 
     container.appendChild(card);
