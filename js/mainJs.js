@@ -104,8 +104,6 @@ document.addEventListener("DOMContentLoaded", () => {
       );
       likedSongs[0].isFavorite = true;
 
-      displayLikedSongs();
-
       displaySongs(allSongs);
     })
     .catch((error) => {
@@ -480,19 +478,33 @@ function displaySongs(songs, genre = null, container = null) {
     });
 
     // ----- Heart Icon -----
-
     const heartIcon = card.querySelector(".heart-icon");
+    if (likedSongs) {
+      heartIcon.classList.toggle(
+        "heart-icon--active",
+        likedSongs.some(
+          (s) => s.title === song.title && s.artistName === song.artistName
+        )
+      );
 
-    // Set initial active state
-    heartIcon.classList.toggle("heart-icon--active", song.isFavorite);
+      heartIcon.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const index = likedSongs.findIndex(
+          (s) => s.title === song.title && s.artistName === song.artistName
+        );
+        if (index === -1) likedSongs.push(song);
+        else likedSongs.splice(index, 1);
 
-    // Click event to toggle like
-    heartIcon.addEventListener("click", (e) => {
-      e.stopPropagation(); // prevent any parent click handlers
-      currentlyPlaying = song; // tell toggleLike which song
-      toggleLike(); // updates likedSongs, isFavorite, hearts
-      displayLikedSongs(); // re-render liked songs section
-    });
+        if (typeof updateHeartIcon === "function") updateHeartIcon();
+
+        heartIcon.classList.toggle(
+          "heart-icon--active",
+          likedSongs.some(
+            (s) => s.title === song.title && s.artistName === song.artistName
+          )
+        );
+      });
+    }
 
     // ----- Add to Queue -----
     const addToQueueBtn = card.querySelector(".add-to-queue-btn");
@@ -687,22 +699,16 @@ function renderQueue() {
 
 function toggleLike() {
   if (!currentlyPlaying) return;
-
-  const songInAll = allSongs.find(
+  const index = likedSongs.findIndex(
     (song) =>
       song.title === currentlyPlaying.title &&
       song.artistName === currentlyPlaying.artistName
   );
-  if (!songInAll) return;
+  if (index === -1) likedSongs.push(currentlyPlaying);
+  else likedSongs.splice(index, 1);
 
-  // Toggle favorite
-  songInAll.isFavorite = !songInAll.isFavorite;
-
-  // Update likedSongs array
-  likedSongs = allSongs.filter((song) => song.isFavorite);
-
-  updateHeartIcon(); // footer heart
-  updateSongCardsHeart(); // main song list hearts
+  updateHeartIcon();
+  updateSongCardsHeart();
 }
 
 function showMainSection(sectionToShow) {
@@ -854,11 +860,7 @@ function displayArtists(artists) {
         artist.songs.map((song) => ({
           ...song,
           artistName: artist.name,
-          isFavorite: likedSongs.some(
-            (likedSong) =>
-              likedSong.title === song.title &&
-              likedSong.artistName === artist.name
-          ),
+          isFavorite: false,
         })),
         artist.name,
         pickContainer
@@ -866,43 +868,5 @@ function displayArtists(artists) {
     });
 
     grid.appendChild(card);
-  });
-}
-
-function displayLikedSongs() {
-  const container = document.querySelector(".main__favorites-container");
-  container.innerHTML = `<h1 class="main__favorites-heading">Your Liked Songs</h1>`;
-
-  likedSongs.forEach((song) => {
-    const card = document.createElement("div");
-    card.classList.add("main__favorites-card");
-
-    card.innerHTML = `
-      <svg class="heart-icon--active" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
-        <path d="M305 151.1L320 171.8L335 151.1C360 116.5 400.2 96 442.9 96C516.4 96 576 155.6 576 229.1L576 231.7C576 343.9 436.1 474.2 363.1 529.9C350.7 539.3 335.5 544 320 544C304.5 544 289.2 539.4 276.9 529.9C203.9 474.2 64 343.9 64 231.7L64 229.1C64 155.6 123.6 96 197.1 96C239.8 96 280 116.5 305 151.1z"/>
-      </svg>
-      <div class="main__fav-song-img-container">
-        <img class="main__fav-song-img" src="${song.picture}" alt="${song.title}" />
-        <h5 class="main__fav-song-title">${song.title}</h5>
-      </div>
-      <div class="main__fav-song-artist-container">
-        <h5 class="main__fav-song-artist">${song.artistName}</h5>
-      </div>
-      <div class="play-btn">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
-          <path d="M187.2 100.9C174.8 94.1 159.8 94.4 147.6 101.6C135.4 108.8 128 121.9 128 136L128 504C128 518.1 135.5 531.2 147.6 538.4C159.7 545.6 174.8 545.9 187.2 539.1L523.2 355.1C536 348.1 544 334.6 544 320C544 305.4 536 291.9 523.2 284.9L187.2 100.9z"/>
-        </svg>
-      </div>
-    `;
-
-    // Add click event to heart in this card
-    const heartIcon = card.querySelector(".heart-icon");
-    heartIcon.addEventListener("click", () => {
-      currentlyPlaying = song; // set current song
-      toggleLike(); // toggle favorite
-      displayLikedSongs(); // update liked songs section
-    });
-
-    container.appendChild(card);
   });
 }
