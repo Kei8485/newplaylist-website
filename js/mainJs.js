@@ -65,6 +65,8 @@ document.addEventListener("DOMContentLoaded", () => {
     })
     .then((data) => {
       // Load first song for footer
+      displayGenresFromSongs(data.artists);
+
       if (data.artists.length > 0 && data.artists[0].songs.length > 0) {
         const artist = data.artists[0];
         const song = {
@@ -245,6 +247,93 @@ document.addEventListener("DOMContentLoaded", () => {
 // ----------------------------
 // Functions
 // ----------------------------
+
+function getUniqueGenres(artists) {
+  const genresSet = new Set();
+
+  artists.forEach((artist) => {
+    artist.songs.forEach((song) => {
+      genresSet.add(song.genre);
+    });
+  });
+
+  return Array.from(genresSet);
+}
+
+function displayGenresFromSongs(artists) {
+  const grid = document.querySelector(".main__genre-heading-grid");
+  if (!grid) return;
+  grid.innerHTML = "";
+
+  const genres = getUniqueGenres(artists);
+
+  genres.forEach((genre) => {
+    const card = document.createElement("div");
+    card.classList.add("main__genre-card");
+
+    const randomColor = `hsl(${Math.floor(Math.random() * 360)}, 70%, ${
+      Math.floor(Math.random() * 20) + 20
+    }%)`;
+    card.style.background = randomColor;
+
+    card.innerHTML = `<h2 class="main__genre-name">${genre}</h2>`;
+
+    card.addEventListener("click", () => {
+      const filteredSongs = [];
+      artists.forEach((artist) => {
+        artist.songs.forEach((song) => {
+          if (song.genre.toLowerCase() === genre.toLowerCase()) {
+            filteredSongs.push({
+              ...song,
+              artistName: artist.name,
+              isFavorite: false,
+            });
+          }
+        });
+      });
+
+      const genreContainer = document.querySelector(".main__genre-container");
+      const heading = genreContainer.querySelector(".main__genre-heading");
+      const topPart = genreContainer.querySelector(".genre-top-part");
+      const pickContainer = genreContainer.querySelector(".main__genre-pick");
+
+      // Update heading
+      heading.textContent = `${genre.toUpperCase()} GENRE`;
+
+      // Hide genre grid
+      grid.style.display = "none";
+
+      // Show pick container
+      pickContainer.classList.add("main__genre-pick--active");
+
+      // Add back button dynamically if not already there
+      let backBtn = topPart.querySelector(".back-btn");
+      if (!backBtn) {
+        backBtn = document.createElement("button");
+        backBtn.classList.add("back-btn");
+        backBtn.innerHTML = `
+          <svg class="back-btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+            <path d="M73.4 297.4C60.9 309.9 60.9 330.2 73.4 342.7L233.4 502.7C245.9 515.2 266.2 515.2 278.7 502.7C291.2 490.2 291.2 469.9 278.7 457.4L173.3 352L544 352C561.7 352 576 337.7 576 320C576 302.3 561.7 288 544 288L173.3 288L278.7 182.6C291.2 170.1 291.2 149.8 278.7 137.3C266.2 124.8 245.9 124.8 233.4 137.3L73.4 297.3z"/>
+          </svg>`;
+        topPart.prepend(backBtn);
+
+        // Add click handler to go back
+        backBtn.addEventListener("click", () => {
+          pickContainer.classList.remove("main__genre-pick--active");
+          grid.style.display = "grid";
+          heading.textContent = "Find the right genre for you!";
+          backBtn.remove(); // remove back button after going back
+        });
+      }
+
+      // Display songs inside pick container
+      displaySongs(filteredSongs, genre, pickContainer);
+    });
+
+    grid.appendChild(card);
+  });
+}
+
 function updateFooter(song) {
   if (!song) {
     footerSongImg.src = "";
@@ -295,10 +384,18 @@ function updatePlayPauseIcon() {
   }
 }
 
-function displaySongs(songs) {
-  const searchContainerDiv = document.querySelector(".search-song-container");
-  if (!searchContainerDiv) return;
-  searchContainerDiv.innerHTML = "";
+function displaySongs(songs, genre = null, container = null) {
+  const targetContainer =
+    container || document.querySelector(".search-song-container");
+
+  if (!targetContainer) return;
+  targetContainer.innerHTML = "";
+
+  if (genre) {
+    const genreHeading = document.createElement("h2");
+    genreHeading.classList.add("genre-heading");
+    targetContainer.appendChild(genreHeading);
+  }
 
   songs.forEach((song) => {
     const card = document.createElement("div");
@@ -330,7 +427,6 @@ function displaySongs(songs) {
             <line x1="12" x2="12" y1="8" y2="16"/>
             <line x1="8" x2="16" y1="12" y2="12"/>
           </svg>
-
         </div>
       </div>
     `;
@@ -356,14 +452,12 @@ function displaySongs(songs) {
 
     // ----- Heart Icon -----
     const heartIcon = card.querySelector(".heart-icon");
-    // initial state
     heartIcon.classList.toggle(
       "heart-icon--active",
       likedSongs.some(
         (s) => s.title === song.title && s.artistName === song.artistName
       )
     );
-
     heartIcon.addEventListener("click", (e) => {
       e.stopPropagation();
       const index = likedSongs.findIndex(
@@ -372,10 +466,8 @@ function displaySongs(songs) {
       if (index === -1) likedSongs.push(song);
       else likedSongs.splice(index, 1);
 
-      // update footer heart
       updateHeartIcon();
 
-      // update this card heart color
       heartIcon.classList.toggle(
         "heart-icon--active",
         likedSongs.some(
@@ -389,22 +481,20 @@ function displaySongs(songs) {
     addToQueueBtn.addEventListener("click", (e) => {
       e.stopPropagation();
 
-      upNextQueue.push(song); // add to queue
-      renderQueue(); // update queue
+      upNextQueue.push(song);
+      renderQueue();
 
-      // ---- Feedback ----
       const msg = document.createElement("div");
       msg.classList.add("queue-feedback");
       msg.textContent = `"${song.title}" added to queue`;
       document.body.appendChild(msg);
 
-      // Animate and remove after 1.2s
       setTimeout(() => {
         msg.remove();
       }, 1200);
     });
 
-    searchContainerDiv.appendChild(card);
+    targetContainer.appendChild(card);
   });
 }
 
@@ -595,7 +685,7 @@ function toggleLike() {
 
 function showMainSection(sectionToShow) {
   const allSections = document.querySelectorAll(
-    ".main__home-container, .queue-container, .main__search-container, .search-part-container"
+    ".main__home-container, .queue-container, .main__search-container, .search-part-container, .main__genre-container"
   );
 
   allSections.forEach((sec) => {
@@ -642,9 +732,11 @@ function renderRecentPlayed() {
   const container = document.querySelector(".main__recent-playlist-container");
   container.innerHTML = "";
 
-  recentPlayed.forEach((song) => {
+  recentPlayed.forEach((song, index) => {
+    // ✅ include index
     const card = document.createElement("div");
-    card.classList.add("main__recent-card");
+    card.classList.add("main__recent-card", "fade-in");
+    card.style.animationDelay = `${index * 0.2}s`; // 0.2s gap between cards
 
     card.innerHTML = `
       <img
@@ -661,7 +753,6 @@ function renderRecentPlayed() {
       </div>
     `;
 
-    // clicking plays the song
     card.addEventListener("click", () => {
       playSong(song);
     });
