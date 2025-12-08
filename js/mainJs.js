@@ -631,8 +631,7 @@ function updateRecentPlayed(song) {
   // add song to the top
   recentPlayed.unshift(song);
 
-  // keep only 6 items maximum
-  if (recentPlayed.length > 6) {
+  if (recentPlayed.length > 12) {
     recentPlayed.pop();
   }
 

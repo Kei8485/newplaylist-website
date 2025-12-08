@@ -1164,8 +1164,8 @@ main {
 .main__recent-playlist-container {
   margin: 10px 0;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr 1fr;
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: auto;
   gap: 10px;
 }
 @keyframes spinGlow {
