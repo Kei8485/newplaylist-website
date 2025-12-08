@@ -42,7 +42,7 @@ let likedSongs = [];
 let recentPlayed = []; // will hold unique, last 6 songs
 
 let isFullscreen = false;
-let currentlyPlaying = null; // song currently playing
+let currentlyPlaying = null;
 let upNextQueue = [
   {
     title: "Killer Queen",
@@ -105,6 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
       likedSongs[0].isFavorite = true;
 
       displaySongs(allSongs);
+      displayLikedSongs();
     })
     .catch((error) => {
       console.error("Error loading JSON:", error);
@@ -356,22 +357,50 @@ function updateFooter(song) {
 
 function playSong(song) {
   if (!song) return;
-  currentlyPlaying = song;
-  updateFooter(currentlyPlaying);
-  footerAudio.play();
-  isPlaying = true;
 
+  // Stop and reset the audio before loading new song
+  footerAudio.pause();
+  footerAudio.currentTime = 0;
+
+  // Update current song
+  currentlyPlaying = song;
+
+  // Update footer (this sets footerAudio.src)
+  updateFooter(currentlyPlaying);
+
+  // Load and play the new audio
+  footerAudio.load();
+
+  const playPromise = footerAudio.play();
+
+  if (playPromise !== undefined) {
+    playPromise
+      .then(() => {
+        isPlaying = true;
+        updatePlayPauseIcon();
+      })
+      .catch((error) => {
+        console.error("Error playing audio:", error);
+        isPlaying = false;
+        updatePlayPauseIcon();
+      });
+  }
+
+  // Add to played history if not last
   if (
     playedHistory.length === 0 ||
     playedHistory[playedHistory.length - 1] !== song
   ) {
     playedHistory.push(song);
   }
-  updateRecentPlayed(song);
 
+  updateRecentPlayed(song);
   updateHeartIcon();
-  updatePlayPauseIcon();
   renderQueue();
+  updateActiveSpinners();
+
+  // Show footer
+  if (footerParent) footerParent.style.display = "block";
 }
 
 function updatePlayPauseIcon() {
@@ -391,7 +420,6 @@ function updatePlayPauseIcon() {
 function displaySongs(songs, genre = null, container = null) {
   const targetContainer =
     container || document.querySelector(".search-song-container");
-
   if (!targetContainer) return;
   targetContainer.innerHTML = "";
 
@@ -407,126 +435,91 @@ function displaySongs(songs, genre = null, container = null) {
 
     card.innerHTML = `
       <img class="song-img" src="${song.picture}" alt="${song.title}" />
-      
       <div class="play-song-btn">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
           <path d="M187.2 100.9C174.8 94.1 159.8 94.4 147.6 101.6C135.4 108.8 128 121.9 128 136L128 504C128 518.1 135.5 531.2 147.6 538.4C159.7 545.6 174.8 545.9 187.2 539.1L523.2 355.1C536 348.1 544 334.6 544 320C544 305.4 536 291.9 523.2 284.9L187.2 100.9z"/>
         </svg>
       </div>
-
       <div class="song-desc">
         <span class="song-title">${song.title}</span>
         <span class="song-artist-name">${song.artistName}</span>
       </div>
-
       <div class="song-desc-lower-part">
         <div class="song-duration-container">
-          <span class="song-duration">0:00</span>
-
+          <span class="song-duration">${song.duration || "0:00"}</span>
           <svg class="heart-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
             <path d="M305 151.1L320 171.8L335 151.1C360 116.5 400.2 96 442.9 96C516.4 96 576 155.6 576 229.1L576 231.7C576 343.9 436.1 474.2 363.1 529.9C350.7 539.3 335.5 544 320 544C304.5 544 289.2 539.4 276.9 529.9C203.9 474.2 64 343.9 64 231.7L64 229.1C64 155.6 123.6 96 197.1 96C239.8 96 280 116.5 305 151.1z"/>
           </svg>
-
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgb(179, 177, 177)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="add-to-queue-btn"> 
             <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/>
             <line x1="12" x2="12" y1="8" y2="16"/>
             <line x1="8" x2="16" y1="12" y2="12"/>
           </svg>
-
           <div class="spinner">
             <div class="rect1"></div>
             <div class="rect2"></div>
             <div class="rect3"></div>
           </div>
-
         </div>
       </div>
     `;
-
-    // ----- Duration -----
-    const durationSpan = card.querySelector(".song-duration");
-    const audio = new Audio(song.audio);
-    audio.addEventListener("loadedmetadata", () => {
-      const min = Math.floor(audio.duration / 60);
-      const sec = Math.floor(audio.duration % 60)
-        .toString()
-        .padStart(2, "0");
-      durationSpan.textContent = `${min}:${sec}`;
-    });
-
-    // ----- Spinner -----
-    const spinner = card.querySelector(".spinner");
-    spinner.classList.remove("active");
-    spinner.style.filter = "grayscale(100%)";
 
     // ----- Play Button -----
     const playBtn = card.querySelector(".play-song-btn");
     playBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      if (typeof playSong === "function") playSong(song);
+      playSong(song); // single audio playback
       if (footerParent) footerParent.style.display = "block";
-
-      // deactivate all spinners
-      document.querySelectorAll(".spinner").forEach((s) => {
-        s.classList.remove("active");
-        s.style.filter = "grayscale(100%)";
-      });
-
-      // activate this spinner
-      spinner.classList.add("active");
-      spinner.style.filter = "none";
     });
 
     // ----- Heart Icon -----
     const heartIcon = card.querySelector(".heart-icon");
-    if (likedSongs) {
-      heartIcon.classList.toggle(
-        "heart-icon--active",
-        likedSongs.some(
-          (s) => s.title === song.title && s.artistName === song.artistName
-        )
+    heartIcon.classList.toggle(
+      "heart-icon--active",
+      likedSongs.some(
+        (s) => s.title === song.title && s.artistName === song.artistName
+      )
+    );
+
+    heartIcon.addEventListener("click", (e) => {
+      e.stopPropagation();
+
+      // Toggle in allSongs
+      const songInAll = allSongs.find(
+        (s) => s.title === song.title && s.artistName === song.artistName
       );
+      if (!songInAll) return;
+      songInAll.isFavorite = !songInAll.isFavorite;
 
-      heartIcon.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const index = likedSongs.findIndex(
-          (s) => s.title === song.title && s.artistName === song.artistName
-        );
-        if (index === -1) likedSongs.push(song);
-        else likedSongs.splice(index, 1);
+      // Update likedSongs
+      likedSongs = allSongs.filter((s) => s.isFavorite);
 
-        if (typeof updateHeartIcon === "function") updateHeartIcon();
-
-        heartIcon.classList.toggle(
-          "heart-icon--active",
-          likedSongs.some(
-            (s) => s.title === song.title && s.artistName === song.artistName
-          )
-        );
-      });
-    }
+      // Refresh UI
+      updateHeartIcon();
+      updateSongCardsHeart();
+      displayLikedSongs();
+    });
 
     // ----- Add to Queue -----
     const addToQueueBtn = card.querySelector(".add-to-queue-btn");
     addToQueueBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      if (upNextQueue) upNextQueue.push(song);
-      if (typeof renderQueue === "function") renderQueue();
+      upNextQueue.push(song);
+      renderQueue();
 
       const msg = document.createElement("div");
       msg.classList.add("queue-feedback");
       msg.textContent = `"${song.title}" added to queue`;
       document.body.appendChild(msg);
-
-      setTimeout(() => {
-        msg.remove();
-      }, 1200);
+      setTimeout(() => msg.remove(), 1200);
     });
 
     targetContainer.appendChild(card);
   });
-}
 
+  // Update spinner for the currently playing song
+  updateActiveSpinners();
+}
 function updateHeartIcon() {
   if (!currentlyPlaying) return;
   heartIcons.forEach((icon) => {
@@ -699,21 +692,28 @@ function renderQueue() {
 
 function toggleLike() {
   if (!currentlyPlaying) return;
-  const index = likedSongs.findIndex(
+
+  const songInAll = allSongs.find(
     (song) =>
       song.title === currentlyPlaying.title &&
       song.artistName === currentlyPlaying.artistName
   );
-  if (index === -1) likedSongs.push(currentlyPlaying);
-  else likedSongs.splice(index, 1);
+  if (!songInAll) return;
 
-  updateHeartIcon();
-  updateSongCardsHeart();
+  // Toggle favorite
+  songInAll.isFavorite = !songInAll.isFavorite;
+
+  // Update likedSongs array
+  likedSongs = allSongs.filter((song) => song.isFavorite);
+
+  updateHeartIcon(); // footer heart
+  updateSongCardsHeart(); // main song list hearts
+  displayLikedSongs(); // update favorites section dynamically
 }
 
 function showMainSection(sectionToShow) {
   const allSections = document.querySelectorAll(
-    ".main__home-container, .queue-container, .main__search-container, .search-part-container, .main__genre-container, .main__artist-container"
+    ".main__home-container, .queue-container, .main__search-container, .search-part-container, .main__genre-container, .main__artist-container, .main__favorites-container"
   );
 
   allSections.forEach((sec) => {
@@ -761,10 +761,9 @@ function renderRecentPlayed() {
   container.innerHTML = "";
 
   recentPlayed.forEach((song, index) => {
-    // ✅ include index
     const card = document.createElement("div");
     card.classList.add("main__recent-card", "fade-in");
-    card.style.animationDelay = `${index * 0.2}s`; // 0.2s gap between cards
+    card.style.animationDelay = `${index * 0.2}s`;
 
     card.innerHTML = `
       <img
@@ -783,6 +782,7 @@ function renderRecentPlayed() {
 
     card.addEventListener("click", () => {
       playSong(song);
+      if (footerParent) footerParent.style.display = "block";
     });
 
     container.appendChild(card);
@@ -794,7 +794,6 @@ function displayArtists(artists) {
   const heading = container.querySelector(".main__artist-heading");
   const grid = container.querySelector(".main__genre-heading-grid");
 
-  // Ensure pick container exists
   let pickContainer = container.querySelector(".main__artist-pick");
   if (!pickContainer) {
     pickContainer = document.createElement("div");
@@ -803,7 +802,7 @@ function displayArtists(artists) {
   }
 
   if (!grid) return;
-  grid.innerHTML = ""; // Clear grid
+  grid.innerHTML = "";
 
   artists.forEach((artist) => {
     const card = document.createElement("div");
@@ -824,11 +823,10 @@ function displayArtists(artists) {
     `;
 
     card.addEventListener("click", () => {
-      grid.style.display = "none"; // hide artist grid
-      pickContainer.classList.add("main__genre-pick--active"); // show songs
+      grid.style.display = "none";
+      pickContainer.classList.add("main__genre-pick--active");
       heading.textContent = `${artist.name.toUpperCase()} SONGS`;
 
-      // Add back button dynamically if not present
       let topPart = container.querySelector(".artist-top-part");
       if (!topPart) {
         topPart = document.createElement("div");
@@ -855,7 +853,6 @@ function displayArtists(artists) {
         });
       }
 
-      // Display the artist's songs using your reusable function
       displaySongs(
         artist.songs.map((song) => ({
           ...song,
@@ -868,5 +865,110 @@ function displayArtists(artists) {
     });
 
     grid.appendChild(card);
+  });
+}
+
+function displayLikedSongs() {
+  const container = document.getElementById("likedSongsContainer");
+  container.innerHTML = "";
+
+  if (likedSongs.length === 0) {
+    container.innerHTML = "<p>No liked songs yet.</p>";
+    return;
+  }
+
+  likedSongs.forEach((song) => {
+    const card = document.createElement("div");
+    card.classList.add("main__favorites-card");
+
+    card.innerHTML = `
+      <svg class="heart-icon ${
+        song.isFavorite ? "heart-icon--active" : ""
+      }" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+        <path d="M305 151.1L320 171.8L335 151.1C360 116.5 400.2 96 442.9 96C516.4 96 576 155.6 576 229.1L576 231.7C576 343.9 436.1 474.2 363.1 529.9C350.7 539.3 335.5 544 320 544C304.5 544 289.2 539.4 276.9 529.9C203.9 474.2 64 343.9 64 231.7L64 229.1C64 155.6 123.6 96 197.1 96C239.8 96 280 116.5 305 151.1z"/>
+      </svg>
+      <div class="main__fav-song-img-container">
+        <img class="main__fav-song-img" src="${song.picture}" alt="${
+      song.title
+    }" />
+        <h5 class="main__fav-song-title">${song.title}</h5>
+      </div>
+      <div class="main__fav-song-artist-container">
+        <h5 class="main__fav-song-artist">${song.artistName}</h5>
+      </div>
+      <div class="play-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+          <path d="M187.2 100.9C174.8 94.1 159.8 94.4 147.6 101.6C135.4 108.8 128 121.9 128 136L128 504C128 518.1 135.5 531.2 147.6 538.4C159.7 545.6 174.8 545.9 187.2 539.1L523.2 355.1C536 348.1 544 334.6 544 320C544 305.4 536 291.9 523.2 284.9L187.2 100.9z"/>
+        </svg>
+      </div>
+      <div class="spinner">
+        <div class="rect1"></div>
+        <div class="rect2"></div>
+        <div class="rect3"></div>
+      </div>
+    `;
+
+    card.querySelector(".heart-icon").addEventListener("click", () => {
+      const songInAll = allSongs.find(
+        (s) => s.title === song.title && s.artistName === song.artistName
+      );
+      if (!songInAll) return;
+      songInAll.isFavorite = !songInAll.isFavorite;
+
+      likedSongs = allSongs.filter((s) => s.isFavorite);
+      updateHeartIcon();
+      updateSongCardsHeart();
+      displayLikedSongs();
+    });
+
+    card.querySelector(".play-btn").addEventListener("click", () => {
+      playSong(song);
+      updateActiveSpinners();
+      if (footerParent) footerParent.style.display = "block";
+    });
+
+    container.appendChild(card);
+  });
+
+  updateActiveSpinners();
+}
+
+function updateActiveSpinners() {
+  // Remove active state from all spinners
+  document.querySelectorAll(".spinner").forEach((spinner) => {
+    spinner.classList.remove("active");
+    spinner.style.filter = "grayscale(100%)";
+  });
+
+  // If no song is playing, return early
+  if (!currentlyPlaying) return;
+
+  // Find all song cards (search, genre, artist, favorites, recent)
+  const allCards = document.querySelectorAll(
+    ".song-card, .main__favorites-card"
+  );
+
+  allCards.forEach((card) => {
+    const titleEl = card.querySelector(".song-title, .main__fav-song-title");
+    const artistEl = card.querySelector(
+      ".song-artist-name, .main__fav-song-artist"
+    );
+
+    if (!titleEl || !artistEl) return;
+
+    const title = titleEl.textContent.trim();
+    const artist = artistEl.textContent.trim();
+
+    // Check if this card matches the currently playing song
+    if (
+      title === currentlyPlaying.title &&
+      artist === currentlyPlaying.artistName
+    ) {
+      const spinner = card.querySelector(".spinner");
+      if (spinner) {
+        spinner.classList.add("active");
+        spinner.style.filter = "none";
+      }
+    }
   });
 }
