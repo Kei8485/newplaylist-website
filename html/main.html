@@ -307,9 +307,11 @@
 
       <!-- artist part -->
       <div class="main__artist-container fade-in">
-        <h1 class="main__artist-heading">
-          Listen to your favorite artist here!
-        </h1>
+        <div class="artist-top-bar">
+          <h1 class="main__artist-heading">
+            Listen to your favorite artist here!
+          </h1>
+        </div>
         <div class="main__genre-heading-grid"></div>
       </div>
 
@@ -319,6 +321,104 @@
         <div id="likedSongsContainer" class="main__favorites-cards"></div>
       </div>
       <!-- favorite part -->
+
+      <!-- playlist part -->
+      <div class="main__playlist-container fade-in">
+        <div class="main__playlist-top-part">
+          <h1 class="main__playlist-heading">Your library:</h1>
+          <button class="main__playlist-btn">Create New</button>
+        </div>
+        <div class="main__playlist-heading-grid"></div>
+      </div>
+      <!-- playlist part -->
+
+      <!-- Modal -->
+      <div id="playlistModal" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>Create New Playlist</h2>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+          </div>
+
+          <form id="playlistForm">
+            <div class="form-group">
+              <label for="playlistName">Playlist Name *</label>
+
+              <input
+                type="text"
+                id="playlistName"
+                name="playlistName"
+                maxlength="50"
+                placeholder="My awesome playlist"
+              />
+              <span class="error-msg">**Please input a name**</span>
+              <div id="nameCounter" class="char-counter">0 / 50</div>
+            </div>
+
+            <div class="form-group">
+              <label for="playlistDesc">Description</label>
+              <textarea
+                id="playlistDesc"
+                name="playlistDesc"
+                maxlength="200"
+                placeholder="Add a description for your playlist..."
+              ></textarea>
+              <div id="descCounter" class="char-counter">0 / 200</div>
+            </div>
+
+            <div class="form-actions">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                onclick="closeModal()"
+              >
+                Cancel
+              </button>
+              <button type="submit" class="btn btn-primary">
+                Create Playlist
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <!-- Modal -->
+
+      <!-- playlist song -->
+      <div class="show-playlist-songs-container fade-in">
+        <div class="playlist-song-header">
+          <svg
+            class="back-btn-icon"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 640 640"
+          >
+            <path
+              d="M73.4 297.4C60.9 309.9 60.9 330.2 73.4 342.7L233.4 502.7C245.9 515.2 266.2 515.2 278.7 502.7C291.2 490.2 291.2 469.9 278.7 457.4L173.3 352L544 352C561.7 352 576 337.7 576 320C576 302.3 561.7 288 544 288L173.3 288L278.7 182.6C291.2 170.1 291.2 149.8 278.7 137.3C266.2 124.8 245.9 124.8 233.4 137.3L73.4 297.3z"
+            />
+          </svg>
+          <span class="playlist-name">Playlist Title</span>
+        </div>
+
+        <div class="playlist-song-card-container"></div>
+      </div>
+
+      <!-- pop up playlist -->
+
+      <div class="add-to-playlist-popup-container">
+        <div class="playlist-popup-heading">
+          <svg
+            class="back-btn-icon"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 640 640"
+          >
+            <path
+              d="M73.4 297.4C60.9 309.9 60.9 330.2 73.4 342.7L233.4 502.7C245.9 515.2 266.2 515.2 278.7 502.7C291.2 490.2 291.2 469.9 278.7 457.4L173.3 352L544 352C561.7 352 576 337.7 576 320C576 302.3 561.7 288 544 288L173.3 288L278.7 182.6C291.2 170.1 291.2 149.8 278.7 137.3C266.2 124.8 245.9 124.8 233.4 137.3L73.4 297.3z"
+            />
+          </svg>
+          <span class="pop-up-text">Song name for Playlist</span>
+        </div>
+
+        <div class="playlist-popup fade-in"></div>
+      </div>
     </main>
 
     <!-- Footer -->

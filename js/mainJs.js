@@ -37,10 +37,11 @@ const footerAudioProgDurationEnd = document.querySelector(
 
 const fullScreenBtn = document.querySelector(".footer__maximize-wrapper");
 
+let playlists = [];
+
 let allSongs = [];
 let likedSongs = [];
 let recentPlayed = []; // will hold unique, last 6 songs
-
 let isFullscreen = false;
 let currentlyPlaying = null;
 let upNextQueue = [
@@ -98,6 +99,25 @@ document.addEventListener("DOMContentLoaded", () => {
           });
         });
       });
+
+      // Manually add the song here, after allSongs exists
+      let playlistName = "My Favorites";
+      let playlist = playlists.find((p) => p.name === playlistName);
+      if (!playlist) {
+        playlist = {
+          name: playlistName,
+          description: "My favorite songs",
+          songs: [],
+        };
+        playlists.push(playlist);
+      }
+
+      let songToAdd = allSongs.find((s) => s.title === "Bohemian Rhapsody");
+      if (songToAdd && !playlist.songs.includes(songToAdd)) {
+        playlist.songs.push(songToAdd);
+      }
+
+      displayPlaylists(); // now it should show
 
       likedSongs = allSongs.filter(
         (song) => song.title === "Bohemian Rhapsody"
@@ -247,11 +267,398 @@ document.addEventListener("DOMContentLoaded", () => {
     const homeContainer = document.querySelector(".main__home-container");
     showMainSection(homeContainer);
   });
+
+  const createPlaylistBtn = document.querySelector(".main__playlist-btn");
+
+  createPlaylistBtn.addEventListener("click", openModal);
+
+  // Form submission
+  document
+    .getElementById("playlistForm")
+    .addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const playlistName = document.getElementById("playlistName").value.trim();
+      const playlistDesc = document.getElementById("playlistDesc").value.trim();
+      const errorMsg = document.querySelector(".error-msg");
+
+      if (!playlistName) {
+        errorMsg.style.display = "block";
+        return; // stop submission
+      } else {
+        errorMsg.style.display = "none";
+      }
+
+      // Optional: check description length or other rules
+
+      console.log("Creating playlist:", {
+        playlistName,
+        playlistDesc,
+      });
+
+      closeModal();
+    });
+
+  // Close on outside click
+  document
+    .getElementById("playlistModal")
+    .addEventListener("click", function (e) {
+      if (e.target === this) {
+        closeModal();
+      }
+    });
+
+  // Close on Escape key
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+      closeModal();
+    }
+  });
+
+  const playlistBackBtn = document.querySelector(
+    ".playlist-song-header .back-btn-icon"
+  );
+
+  playlistBackBtn.addEventListener("click", () => {
+    playlistSongsView.style.display = "none"; // hide playlist songs
+    playlistGrid.style.display = "grid"; // show playlist main page
+  });
+
+  const backBtn = popup.querySelector(".playlist-popup-heading .back-btn-icon");
+  backBtn.onclick = hidePlaylistPopup;
+
+  backBtn.addEventListener("click", () => {
+    playlistSongsView.style.display = "none";
+
+    playlistGrid.style.display = "grid"; // show playlist grid again
+    playListGridTopPart.querySelector(".main__playlist-heading").style.display =
+      "block"; // show header
+    playListGridTopPart.querySelector(".main__playlist-btn").style.display =
+      "block"; // show create button
+  });
 });
 
 // ----------------------------
 // Functions
 // ----------------------------
+
+// Add this to your existing variables at the top
+
+// Replace your existing openModal and closeModal functions with these:
+function openModal() {
+  const modal = document.getElementById("playlistModal");
+  modal.classList.add("active");
+  document.getElementById("playlistName").focus();
+  // Clear any previous errors
+  const errorMsg = document.querySelector(".error-msg");
+  if (errorMsg) errorMsg.style.display = "none";
+}
+
+function closeModal() {
+  const modal = document.getElementById("playlistModal");
+  modal.classList.remove("active");
+  document.getElementById("playlistForm").reset();
+  document.getElementById("nameCounter").textContent = "0 / 50";
+  document.getElementById("descCounter").textContent = "0 / 200";
+  const errorMsg = document.querySelector(".error-msg");
+  if (errorMsg) errorMsg.style.display = "none";
+}
+
+// Add this function to display playlists
+const playlistGrid = document.querySelector(".main__playlist-heading-grid");
+const playListGridTopPart = document.querySelector(".main__playlist-top-part");
+const playlistSongsView = document.querySelector(
+  ".show-playlist-songs-container"
+);
+const playlistSongsContainer = document.querySelector(
+  ".playlist-song-card-container"
+);
+const playlistNameText = document.querySelector(".playlist-name");
+const backBtn = document.querySelector(".back-btn-icon");
+
+function displayPlaylists() {
+  const grid = document.querySelector(".main__playlist-heading-grid");
+  grid.innerHTML = "";
+
+  if (playlists.length === 0) {
+    grid.innerHTML = `
+      <div style="
+        grid-column: 1/-1; 
+        text-align: center; 
+        padding: 60px 20px;
+        color: rgba(255, 255, 255, 0.6);
+      ">
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" 
+        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+        style="margin: 0 auto 20px; opacity: 0.5;">
+          <path d="M9 18V5l12-2v13"></path>
+          <circle cx="6" cy="18" r="3"></circle>
+          <circle cx="18" cy="16" r="3"></circle>
+        </svg>
+        <p style="font-size: 1.2rem; margin-bottom: 10px;">No playlists yet</p>
+        <p style="font-size: 0.9rem; opacity: 0.7;">Create your first playlist to get started!</p>
+      </div>
+    `;
+    return;
+  }
+
+  playlists.forEach((playlist, index) => {
+    const card = document.createElement("div");
+    card.classList.add("playlist-card");
+
+    card.style.animation = "fadeIn 0.4s ease forwards";
+    card.style.animationDelay = `${index * 0.1}s`;
+    card.style.opacity = "0";
+
+    card.innerHTML = `
+      <div class="playlist-card-inner">
+        <div class="playlist-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" 
+            fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 18V5l12-2v13"></path>
+            <circle cx="6" cy="18" r="3"></circle>
+            <circle cx="18" cy="16" r="3"></circle>
+          </svg>
+        </div>
+        <h3>${playlist.name}</h3>
+        <p class="playlist-desc">${playlist.description || "No description"}</p>
+        <div class="playlist-meta">
+          <span class="song-count">${playlist.songs.length} songs</span>
+        </div>
+        <button class="playlist-delete-btn" data-id="${playlist.id}">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" 
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6
+            m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+        </button>
+      </div>
+    `;
+
+    // CLICK — OPEN PLAYLIST
+    card.addEventListener("click", (e) => {
+      if (!e.target.closest(".playlist-delete-btn")) {
+        playlistSongsView.style.display = "block";
+        playlistSongsView.classList.add("active");
+
+        playlistGrid.style.display = "none"; // hide playlist grid
+        // Hide header and create button
+        playListGridTopPart.querySelector(
+          ".main__playlist-heading"
+        ).style.display = "none";
+        playListGridTopPart.querySelector(".main__playlist-btn").style.display =
+          "none";
+
+        playlistNameText.textContent = playlist.name;
+        displayPlaylistSongs(playlist);
+      }
+    });
+
+    // DELETE BUTTON
+    const deleteBtn = card.querySelector(".playlist-delete-btn");
+    deleteBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (confirm(`Delete playlist "${playlist.name}"?`)) {
+        playlists = playlists.filter((p) => p.id !== playlist.id);
+        displayPlaylists();
+        showSuccessMessage(`Playlist "${playlist.name}" deleted`);
+      }
+    });
+
+    grid.appendChild(card);
+  });
+}
+
+// BACK BUTTON HANDLER
+backBtn.addEventListener("click", () => {
+  playlistSongsView.style.display = "none";
+
+  playlistGrid.style.display = "grid"; // show playlist grid again
+  playListGridTopPart.querySelector(".main__playlist-heading").style.display =
+    "block"; // show header
+  playListGridTopPart.querySelector(".main__playlist-btn").style.display =
+    "block"; // show create button
+});
+
+// BACK BUTTON HANDLER (outside displayPlaylists)
+backBtn.addEventListener("click", () => {
+  playlistSongsView.style.display = "none";
+
+  playlistGrid.style.display = "grid"; // show playlist grid again
+  playListGridTopPart.querySelector(".main__playlist-heading").style.display =
+    "block"; // show header
+  playListGridTopPart.querySelector(".main__playlist-btn").style.display =
+    "block"; // show create button
+});
+
+function displayPlaylistSongs(playlist) {
+  playlistSongsContainer.innerHTML = "";
+
+  if (playlist.songs.length === 0) {
+    playlistSongsContainer.innerHTML = `
+      <p style="text-align:center; opacity:0.7; padding:20px;">
+        No songs in this playlist
+      </p>
+    `;
+    return;
+  }
+
+  playlist.songs.forEach((song, index) => {
+    const card = document.createElement("div");
+    card.classList.add("main__favorites-card"); // same style as liked songs
+
+    card.innerHTML = `
+      <svg class="remove-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22"
+           viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+
+      <div class="main__fav-song-img-container">
+        <img class="main__fav-song-img" src="${song.picture}" alt="${song.title}" />
+        <h5 class="main__fav-song-title">${song.title}</h5>
+      </div>
+
+      <div class="main__fav-song-artist-container">
+        <h5 class="main__fav-song-artist">${song.artistName}</h5>
+      </div>
+
+      <div class="play-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+          <path d="M187.2 100.9C174.8 94.1 159.8 94.4 147.6 101.6C135.4 108.8 128 121.9 128 136L128 504C128 518.1 135.5 531.2 147.6 538.4C159.7 545.6 174.8 545.9 187.2 539.1L523.2 355.1C536 348.1 544 334.6 544 320C544 305.4 536 291.9 523.2 284.9L187.2 100.9z"/>
+        </svg>
+      </div>
+
+      <div class="spinner">
+        <div class="rect1"></div>
+        <div class="rect2"></div>
+        <div class="rect3"></div>
+      </div>
+    `;
+
+    // ❌ REMOVE FROM PLAYLIST
+    card.querySelector(".remove-icon").addEventListener("click", () => {
+      playlist.songs.splice(index, 1); // remove song from playlist
+      displayPlaylistSongs(playlist); // re-render
+      showSuccessMessage("Song removed from playlist");
+    });
+
+    // ▶ PLAY SONG
+    card.querySelector(".play-btn").addEventListener("click", () => {
+      playSong(song);
+      updateActiveSpinners();
+      if (footerParent) footerParent.style.display = "block";
+    });
+
+    playlistSongsContainer.appendChild(card);
+  });
+
+  updateActiveSpinners();
+}
+
+// Add success message function
+function showSuccessMessage(message) {
+  const msg = document.createElement("div");
+  msg.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #7e1549, #a02245);
+    color: #fff;
+    padding: 16px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    z-index: 2000;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    animation: slideInRight 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    opacity: 0.8;
+  `;
+  msg.textContent = message;
+  document.body.appendChild(msg);
+
+  setTimeout(() => {
+    msg.style.animation = "slideOutRight 0.3s ease";
+    setTimeout(() => msg.remove(), 300);
+  }, 2500);
+}
+
+// Update the form submission handler inside DOMContentLoaded
+// Replace the existing form submission code with this:
+document
+  .getElementById("playlistForm")
+  .addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const playlistName = document.getElementById("playlistName").value.trim();
+    const playlistDesc = document.getElementById("playlistDesc").value.trim();
+    const errorMsg = document.querySelector(".error-msg");
+
+    if (!playlistName) {
+      errorMsg.style.display = "block";
+      document.getElementById("playlistName").focus();
+      return;
+    } else {
+      errorMsg.style.display = "none";
+    }
+
+    // Create playlist object
+    const newPlaylist = {
+      name: playlistName,
+      description: playlistDesc,
+      songs: [],
+    };
+
+    // Add to playlists array
+    playlists.push(newPlaylist);
+
+    // Display playlists
+    displayPlaylists();
+
+    // Show success message
+    showSuccessMessage(`Playlist "${playlistName}" created successfully!`);
+
+    // Close modal
+    closeModal();
+  });
+
+// Add character counter event listeners inside DOMContentLoaded
+const playlistNameInput = document.getElementById("playlistName");
+const playlistDescInput = document.getElementById("playlistDesc");
+
+playlistNameInput.addEventListener("input", () => {
+  updateCharCounter("playlistName", "nameCounter", 50);
+  // Clear error on input
+  const errorMsg = document.querySelector(".error-msg");
+  if (errorMsg && playlistNameInput.value.trim()) {
+    errorMsg.style.display = "none";
+  }
+});
+
+playlistDescInput.addEventListener("input", () => {
+  updateCharCounter("playlistDesc", "descCounter", 200);
+});
+
+// Call displayPlaylists on page load to show empty state
+displayPlaylists();
+
+// Character counter
+function updateCharCounter(inputId, counterId, maxLength) {
+  const input = document.getElementById(inputId);
+  const counter = document.getElementById(counterId);
+  const length = input.value.length;
+
+  counter.textContent = `${length} / ${maxLength}`;
+
+  counter.classList.remove("warning", "error");
+  if (length >= maxLength * 0.9) {
+    counter.classList.add("warning");
+  }
+  if (length >= maxLength) {
+    counter.classList.add("error");
+  }
+}
 
 function getUniqueGenres(artists) {
   const genresSet = new Set();
@@ -426,6 +833,7 @@ function displaySongs(songs, genre = null, container = null) {
   if (genre) {
     const genreHeading = document.createElement("h2");
     genreHeading.classList.add("genre-heading");
+    genreHeading.textContent = genre;
     targetContainer.appendChild(genreHeading);
   }
 
@@ -455,6 +863,9 @@ function displaySongs(songs, genre = null, container = null) {
             <line x1="12" x2="12" y1="8" y2="16"/>
             <line x1="8" x2="16" y1="12" y2="12"/>
           </svg>
+          <svg class="addToPlaylistIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"> 
+            <path d="M352 128C352 110.3 337.7 96 320 96C302.3 96 288 110.3 288 128L288 288L128 288C110.3 288 96 302.3 96 320C96 337.7 110.3 352 128 352L288 352L288 512C288 529.7 302.3 544 320 544C337.7 544 352 529.7 352 512L352 352L512 352C529.7 352 544 337.7 544 320C544 302.3 529.7 288 512 288L352 288L352 128z"/> 
+          </svg>
           <div class="spinner">
             <div class="rect1"></div>
             <div class="rect2"></div>
@@ -468,8 +879,15 @@ function displaySongs(songs, genre = null, container = null) {
     const playBtn = card.querySelector(".play-song-btn");
     playBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      playSong(song); // single audio playback
+      playSong(song);
       if (footerParent) footerParent.style.display = "block";
+    });
+
+    // ----- Add to Playlist -----
+    const addToPlaylistIcon = card.querySelector(".addToPlaylistIcon");
+    addToPlaylistIcon.addEventListener("click", (e) => {
+      e.stopPropagation();
+      showPlaylistPopup(song);
     });
 
     // ----- Heart Icon -----
@@ -483,18 +901,13 @@ function displaySongs(songs, genre = null, container = null) {
 
     heartIcon.addEventListener("click", (e) => {
       e.stopPropagation();
-
-      // Toggle in allSongs
       const songInAll = allSongs.find(
         (s) => s.title === song.title && s.artistName === song.artistName
       );
       if (!songInAll) return;
       songInAll.isFavorite = !songInAll.isFavorite;
-
-      // Update likedSongs
       likedSongs = allSongs.filter((s) => s.isFavorite);
 
-      // Refresh UI
       updateHeartIcon();
       updateSongCardsHeart();
       displayLikedSongs();
@@ -514,12 +927,24 @@ function displaySongs(songs, genre = null, container = null) {
       setTimeout(() => msg.remove(), 1200);
     });
 
+    // ----- Duration Fix -----
+    const durationSpan = card.querySelector(".song-duration");
+    if (!song.duration || song.duration === "0:00") {
+      getSongDuration(song.audio, (realDuration) => {
+        durationSpan.textContent = realDuration;
+        song.duration = realDuration; // cache duration
+      });
+    } else {
+      durationSpan.textContent = song.duration;
+    }
+
     targetContainer.appendChild(card);
   });
 
-  // Update spinner for the currently playing song
+  // Update spinner for currently playing song
   updateActiveSpinners();
 }
+
 function updateHeartIcon() {
   if (!currentlyPlaying) return;
   heartIcons.forEach((icon) => {
@@ -713,7 +1138,7 @@ function toggleLike() {
 
 function showMainSection(sectionToShow) {
   const allSections = document.querySelectorAll(
-    ".main__home-container, .queue-container, .main__search-container, .search-part-container, .main__genre-container, .main__artist-container, .main__favorites-container"
+    ".main__home-container, .queue-container, .main__search-container, .search-part-container, .main__genre-container, .main__artist-container, .main__favorites-container, .main__playlist-container"
   );
 
   allSections.forEach((sec) => {
@@ -823,41 +1248,52 @@ function displayArtists(artists) {
     `;
 
     card.addEventListener("click", () => {
+      // Hide artist grid
       grid.style.display = "none";
+
+      // Show artist songs container
       pickContainer.classList.add("main__genre-pick--active");
+
+      // Update heading
       heading.textContent = `${artist.name.toUpperCase()} SONGS`;
 
+      // Create top bar (back button container)
       let topPart = container.querySelector(".artist-top-part");
       if (!topPart) {
         topPart = document.createElement("div");
         topPart.classList.add("artist-top-part");
         heading.before(topPart);
+      } else {
+        topPart.innerHTML = ""; // clear previous buttons if any
       }
 
-      let backBtn = topPart.querySelector(".back-btn");
-      if (!backBtn) {
-        backBtn = document.createElement("button");
-        backBtn.classList.add("back-btn");
-        backBtn.innerHTML = `
-          <svg class="back-btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
-            <path d="M73.4 297.4C60.9 309.9 60.9 330.2 73.4 342.7L233.4 502.7C245.9 515.2 266.2 515.2 278.7 502.7C291.2 490.2 291.2 469.9 278.7 457.4L173.3 352L544 352C561.7 352 576 337.7 576 320C576 302.3 561.7 288 544 288L173.3 288L278.7 182.6C291.2 170.1 291.2 149.8 278.7 137.3C266.2 124.8 245.9 124.8 233.4 137.3L73.4 297.3z"/>
-          </svg>`;
-        topPart.prepend(backBtn);
+      // Create BACK BUTTON dynamically
+      const backBtn = document.createElement("button");
+      backBtn.classList.add("back-btn");
+      backBtn.innerHTML = `
+        <svg class="back-btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+          <path d="M73.4 297.4C60.9 309.9 60.9 330.2 73.4 342.7L233.4 502.7C245.9 515.2 266.2 515.2 278.7 502.7C291.2 490.2 291.2 469.9 278.7 457.4L173.3 352L544 352C561.7 352 576 337.7 576 320C576 302.3 561.7 288 544 288L173.3 288L278.7 182.6C291.2 170.1 291.2 149.8 278.7 137.3C266.2 124.8 245.9 124.8 233.4 137.3L73.4 297.3z"/>
+        </svg>`;
+      topPart.appendChild(backBtn);
 
-        backBtn.addEventListener("click", () => {
-          pickContainer.classList.remove("main__genre-pick--active");
-          grid.style.display = "grid";
-          heading.textContent = "Listen to your favorite artist here!";
-          backBtn.remove();
-          pickContainer.innerHTML = "";
-        });
-      }
+      // Back button behavior
+      backBtn.addEventListener("click", () => {
+        pickContainer.classList.remove("main__genre-pick--active");
+        grid.style.display = "grid";
+        heading.textContent = "Listen to your favorite artist here!";
+        pickContainer.innerHTML = "";
+        topPart.innerHTML = ""; // remove back button
+      });
 
+      // DISPLAY SONGS OF THAT ARTIST
       displaySongs(
         artist.songs.map((song) => ({
           ...song,
           artistName: artist.name,
-          isFavorite: false,
+          isFavorite: likedSongs.some(
+            (liked) =>
+              liked.title === song.title && liked.artistName === artist.name
+          ),
         })),
         artist.name,
         pickContainer
@@ -971,4 +1407,81 @@ function updateActiveSpinners() {
       }
     }
   });
+}
+
+function showPlaylistPopup(song) {
+  const popup = document.querySelector(".add-to-playlist-popup-container");
+  const songNameText = popup.querySelector(".pop-up-text");
+
+  songNameText.textContent = `Add to playlist - "${song.title}"`;
+
+  const playlistPopup = popup.querySelector(".playlist-popup");
+  playlistPopup.innerHTML = "";
+
+  playlists.forEach((playlist, index) => {
+    const playlistCard = document.createElement("div");
+    playlistCard.classList.add("popup-song-card");
+
+    playlistCard.innerHTML = `
+      <div class="popup-song-info">
+        <span class="playlist-number">${index + 1}</span>
+        <span class="popup-song-title">${playlist.name}</span>
+        <svg class="addToPlaylistIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+          <path d="M352 128C352 110.3 337.7 96 320 96C302.3 96 288 110.3 288 128L288 288L128 288C110.3 288 96 302.3 96 320C96 337.7 110.3 352 128 352L288 352L288 512C288 529.7 302.3 544 320 544C337.7 544 352 529.7 352 512L352 352L512 352C529.7 352 544 337.7 544 320C544 302.3 529.7 288 512 288L352 288L352 128z"/>
+        </svg>
+      </div>
+    `;
+
+    playlistCard.addEventListener("click", () => {
+      addSongToPlaylist(playlist, song);
+      hidePlaylistPopup();
+    });
+
+    playlistPopup.appendChild(playlistCard);
+  });
+
+  // Show popup
+  popup.style.display = "block";
+
+  // Disable scroll
+  document.body.style.overflow = "hidden";
+
+  // FIX: Attach back button listener AFTER popup is visible
+  const backBtn = popup.querySelector(".playlist-popup-heading .back-btn-icon");
+  if (backBtn) {
+    backBtn.onclick = hidePlaylistPopup;
+  }
+}
+
+function hidePlaylistPopup() {
+  const popup = document.querySelector(".add-to-playlist-popup-container");
+  popup.style.display = "none";
+
+  // Restore scrolling
+  document.body.style.overflow = "";
+}
+
+function addSongToPlaylist(playlist, song) {
+  // Check if song already exists
+  const exists = playlist.songs.some(
+    (s) => s.title === song.title && s.artistName === song.artistName
+  );
+
+  if (!exists) {
+    playlist.songs.push(song);
+
+    // Show feedback
+    const msg = document.createElement("div");
+    msg.classList.add("queue-feedback");
+    msg.textContent = `"${song.title}" added to ${playlist.name}`;
+    document.body.appendChild(msg);
+    setTimeout(() => msg.remove(), 1200);
+  } else {
+    // Show already exists message
+    const msg = document.createElement("div");
+    msg.classList.add("queue-feedback");
+    msg.textContent = `"${song.title}" is already in ${playlist.name}`;
+    document.body.appendChild(msg);
+    setTimeout(() => msg.remove(), 1200);
+  }
 }
