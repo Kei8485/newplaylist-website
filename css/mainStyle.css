@@ -911,6 +911,7 @@ main {
   width: 15px;
   height: 15px;
   fill: rgb(136, 130, 130);
+  flex-shrink: 0; /* prevent shrinking */
 }
 
 .queue-card {
@@ -924,7 +925,6 @@ main {
   border-radius: 12px;
   padding: 1rem;
   cursor: pointer;
-
   transition: all 0.4s ease;
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(8px);
@@ -965,8 +965,10 @@ main {
 .queue-number {
   color: white;
   font-size: 1.6rem;
+  width: 2rem;
+  text-align: center;
+  flex: 0 1 0;
 }
-
 .queue-song-img {
   width: 40px;
   height: 40px;
@@ -975,9 +977,10 @@ main {
 
 .queue-song-container {
   display: flex;
+  flex: 1;
   gap: 10px;
+  align-items: center;
 }
-
 .queue-song-desc {
   display: flex;
   flex-direction: column;
@@ -1287,6 +1290,7 @@ main {
   column-gap: 10px;
   gap: 10px;
   grid-template-columns: 1fr 1fr;
+  padding-bottom: 100px;
 }
 
 .main__genre-heading {
@@ -1584,6 +1588,7 @@ main {
   display: none;
   max-width: 90%;
   margin: 0 auto;
+  padding-bottom: 200px;
 }
 
 .main__favorites-heading {

@@ -1,9 +1,5 @@
-// ----------------------------
-// 1. Variables & select elements
-// ----------------------------
-
-let playedHistory = []; // history of played songs
-let isPlaying = false; // play/pause state
+let playedHistory = [];
+let isPlaying = false;
 
 const body = document.querySelector("body");
 const footerParent = document.querySelector("footer");
@@ -41,7 +37,7 @@ let playlists = [];
 
 let allSongs = [];
 let likedSongs = [];
-let recentPlayed = []; // will hold unique, last 6 songs
+let recentPlayed = [];
 let isFullscreen = false;
 let currentlyPlaying = null;
 let upNextQueue = [
@@ -52,13 +48,8 @@ let upNextQueue = [
     artistName: "Queen",
   },
 ];
-// ----------------------------
-// 2. Wait for DOM to load
-// ----------------------------
+
 document.addEventListener("DOMContentLoaded", () => {
-  // ----------------------------
-  // Fetch JSON & initialize player
-  // ----------------------------
   fetch("../json/SystemMusic.json")
     .then((response) => {
       if (!response.ok) throw new Error("JSON file not found");
@@ -84,7 +75,6 @@ document.addEventListener("DOMContentLoaded", () => {
         updateFooter(null);
       }
 
-      // Populate allSongs for search
       allSongs = [];
       data.artists.forEach((artist) => {
         artist.songs.forEach((song) => {
@@ -117,7 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
         playlist.songs.push(songToAdd);
       }
 
-      displayPlaylists(); // now it should show
+      displayPlaylists();
 
       likedSongs = allSongs.filter(
         (song) => song.title === "Bohemian Rhapsody"
@@ -132,9 +122,6 @@ document.addEventListener("DOMContentLoaded", () => {
       updateFooter(null);
     });
 
-  // ----------------------------
-  // Footer / Play functions
-  // ----------------------------
   footerBtnBack.addEventListener("click", () => {
     if (playedHistory.length > 1) {
       const lastSong = playedHistory.pop();
@@ -182,20 +169,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   fullScreenBtn.addEventListener("click", toggleFullscreen);
 
-  // After allSongs is populated
   const searchInput = document.querySelector(".header__input");
   const searchButton = document.querySelector(".header__search-icon");
 
   const searchPartContainer = document.querySelector(".search-part-container");
 
   searchInput.addEventListener("input", () => {
-    // If fullscreen, exit fullscreen first
     if (isFullscreen) toggleFullscreen();
 
     showMainSection(searchPartContainer);
     searchPartContainer.classList.add("active");
 
-    searchPartContainer.style.display = "block"; // ensure block
+    searchPartContainer.style.display = "block";
 
     const searchDesc = document.querySelector(".search-desc");
     const query = searchInput.value.toLowerCase();
@@ -220,7 +205,6 @@ document.addEventListener("DOMContentLoaded", () => {
     renderQueue();
   });
 
-  // nav part
   const menuIcon = document.getElementById("menuIcon");
   const navMenu = document.querySelector(".main__nav-menu-container");
   const searchIcon = document.getElementById("searchIcon");
@@ -253,7 +237,6 @@ document.addEventListener("DOMContentLoaded", () => {
         showMainSection(selectedView);
       }
 
-      // close nav on mobile
       if (navMenu.classList.contains("main__nav--active")) {
         navMenu.classList.remove("main__nav--active");
         navMenu.style.transitionDuration = "2.5s";
@@ -288,8 +271,6 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         errorMsg.style.display = "none";
       }
-
-      // Optional: check description length or other rules
 
       console.log("Creating playlist:", {
         playlistName,
@@ -342,9 +323,6 @@ document.addEventListener("DOMContentLoaded", () => {
 // Functions
 // ----------------------------
 
-// Add this to your existing variables at the top
-
-// Replace your existing openModal and closeModal functions with these:
 function openModal() {
   const modal = document.getElementById("playlistModal");
   modal.classList.add("active");
@@ -352,6 +330,7 @@ function openModal() {
   // Clear any previous errors
   const errorMsg = document.querySelector(".error-msg");
   if (errorMsg) errorMsg.style.display = "none";
+  footerParent.style.zIndex = "0";
 }
 
 function closeModal() {
@@ -362,6 +341,7 @@ function closeModal() {
   document.getElementById("descCounter").textContent = "0 / 200";
   const errorMsg = document.querySelector(".error-msg");
   if (errorMsg) errorMsg.style.display = "none";
+  footerParent.style.zIndex = "1";
 }
 
 // Add this function to display playlists
@@ -558,7 +538,6 @@ function displayPlaylistSongs(playlist) {
   updateActiveSpinners();
 }
 
-// Add success message function
 function showSuccessMessage(message) {
   const msg = document.createElement("div");
   msg.style.cssText = `
@@ -585,8 +564,6 @@ function showSuccessMessage(message) {
   }, 2500);
 }
 
-// Update the form submission handler inside DOMContentLoaded
-// Replace the existing form submission code with this:
 document
   .getElementById("playlistForm")
   .addEventListener("submit", function (e) {
@@ -604,28 +581,22 @@ document
       errorMsg.style.display = "none";
     }
 
-    // Create playlist object
     const newPlaylist = {
-      id: Date.now(), // 🔹 Add unique ID
+      id: Date.now(),
       name: playlistName,
       description: playlistDesc,
       songs: [],
     };
 
-    // Add to playlists array
     playlists.push(newPlaylist);
 
-    // Display playlists
     displayPlaylists();
 
-    // Show success message
     showSuccessMessage(`Playlist "${playlistName}" created successfully!`);
 
-    // Close modal
     closeModal();
   });
 
-// Add character counter event listeners inside DOMContentLoaded
 const playlistNameInput = document.getElementById("playlistName");
 const playlistDescInput = document.getElementById("playlistDesc");
 
@@ -642,10 +613,8 @@ playlistDescInput.addEventListener("input", () => {
   updateCharCounter("playlistDesc", "descCounter", 200);
 });
 
-// Call displayPlaylists on page load to show empty state
 displayPlaylists();
 
-// Character counter
 function updateCharCounter(inputId, counterId, maxLength) {
   const input = document.getElementById(inputId);
   const counter = document.getElementById(counterId);
@@ -711,16 +680,12 @@ function displayGenresFromSongs(artists) {
       const topPart = genreContainer.querySelector(".genre-top-part");
       const pickContainer = genreContainer.querySelector(".main__genre-pick");
 
-      // Update heading
       heading.textContent = `${genre.toUpperCase()} GENRE`;
 
-      // Hide genre grid
       grid.style.display = "none";
 
-      // Show pick container
       pickContainer.classList.add("main__genre-pick--active");
 
-      // Add back button dynamically if not already there
       let backBtn = topPart.querySelector(".back-btn");
       if (!backBtn) {
         backBtn = document.createElement("button");
@@ -767,17 +732,13 @@ function updateFooter(song) {
 function playSong(song) {
   if (!song) return;
 
-  // Stop and reset the audio before loading new song
   footerAudio.pause();
   footerAudio.currentTime = 0;
 
-  // Update current song
   currentlyPlaying = song;
 
-  // Update footer (this sets footerAudio.src)
   updateFooter(currentlyPlaying);
 
-  // Load and play the new audio
   footerAudio.load();
 
   const playPromise = footerAudio.play();
@@ -795,7 +756,6 @@ function playSong(song) {
       });
   }
 
-  // Add to played history if not last
   if (
     playedHistory.length === 0 ||
     playedHistory[playedHistory.length - 1] !== song
@@ -808,7 +768,6 @@ function playSong(song) {
   renderQueue();
   updateActiveSpinners();
 
-  // Show footer
   if (footerParent) footerParent.style.display = "block";
 }
 
@@ -877,7 +836,6 @@ function displaySongs(songs, genre = null, container = null) {
       </div>
     `;
 
-    // ----- Play Button -----
     const playBtn = card.querySelector(".play-song-btn");
     playBtn.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -885,14 +843,12 @@ function displaySongs(songs, genre = null, container = null) {
       if (footerParent) footerParent.style.display = "block";
     });
 
-    // ----- Add to Playlist -----
     const addToPlaylistIcon = card.querySelector(".addToPlaylistIcon");
     addToPlaylistIcon.addEventListener("click", (e) => {
       e.stopPropagation();
       showPlaylistPopup(song);
     });
 
-    // ----- Heart Icon -----
     const heartIcon = card.querySelector(".heart-icon");
     heartIcon.classList.toggle(
       "heart-icon--active",
@@ -915,7 +871,6 @@ function displaySongs(songs, genre = null, container = null) {
       displayLikedSongs();
     });
 
-    // ----- Add to Queue -----
     const addToQueueBtn = card.querySelector(".add-to-queue-btn");
     addToQueueBtn.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -929,7 +884,6 @@ function displaySongs(songs, genre = null, container = null) {
       setTimeout(() => msg.remove(), 1200);
     });
 
-    // ----- Duration Fix -----
     const durationSpan = card.querySelector(".song-duration");
     if (!song.duration || song.duration === "0:00") {
       getSongDuration(song.audio, (realDuration) => {
@@ -943,7 +897,6 @@ function displaySongs(songs, genre = null, container = null) {
     targetContainer.appendChild(card);
   });
 
-  // Update spinner for currently playing song
   updateActiveSpinners();
 }
 
@@ -1023,7 +976,7 @@ function autoPlayNext() {
   if (upNextQueue.length > 0) {
     const nextSong = upNextQueue.shift();
     playSong(nextSong);
-    renderQueue(); // 🔹 update queue UI immediately
+    renderQueue();
   } else {
     isPlaying = false;
     updateFooter(null);
@@ -1065,7 +1018,7 @@ function getSongDuration(audioSrc, callback) {
   });
 }
 
-const queueIcon = document.querySelector(".queue-icon"); // your queue button
+const queueIcon = document.querySelector(".queue-icon");
 const queueContainer = document.querySelector(".queue-container");
 
 // Function to populate queue
@@ -1138,6 +1091,14 @@ function toggleLike() {
   updateHeartIcon(); // footer heart
   updateSongCardsHeart(); // main song list hearts
   displayLikedSongs(); // update favorites section dynamically
+}
+
+const playlistSongContainer = document.querySelector(
+  ".show-playlist-songs-container"
+);
+
+function showPlaylistSongContainer() {
+  playlistSongContainer.style.display = "block";
 }
 
 function showMainSection(sectionToShow) {
@@ -1289,7 +1250,6 @@ function displayArtists(artists) {
         topPart.innerHTML = ""; // remove back button
       });
 
-      // DISPLAY SONGS OF THAT ARTIST
       displaySongs(
         artist.songs.map((song) => ({
           ...song,
@@ -1374,16 +1334,13 @@ function displayLikedSongs() {
 }
 
 function updateActiveSpinners() {
-  // Remove active state from all spinners
   document.querySelectorAll(".spinner").forEach((spinner) => {
     spinner.classList.remove("active");
     spinner.style.filter = "grayscale(100%)";
   });
 
-  // If no song is playing, return early
   if (!currentlyPlaying) return;
 
-  // Find all song cards (search, genre, artist, favorites, recent)
   const allCards = document.querySelectorAll(
     ".song-card, .main__favorites-card"
   );
@@ -1399,7 +1356,6 @@ function updateActiveSpinners() {
     const title = titleEl.textContent.trim();
     const artist = artistEl.textContent.trim();
 
-    // Check if this card matches the currently playing song
     if (
       title === currentlyPlaying.title &&
       artist === currentlyPlaying.artistName
@@ -1450,7 +1406,6 @@ function showPlaylistPopup(song) {
   // Disable scroll
   document.body.style.overflow = "hidden";
 
-  // FIX: Attach back button listener AFTER popup is visible
   const backBtn = popup.querySelector(".playlist-popup-heading .back-btn-icon");
   if (backBtn) {
     backBtn.onclick = hidePlaylistPopup;
@@ -1474,7 +1429,7 @@ function addSongToPlaylist(playlist, song) {
   if (!exists) {
     playlist.songs.push(song);
 
-    displayPlaylists(); // 🔹 refresh playlist grid to update count
+    displayPlaylists();
 
     // Show feedback
     const msg = document.createElement("div");
