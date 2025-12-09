@@ -16,11 +16,162 @@
           "picture": "../img/songPicture/queenPicture/bohemianRhapsody.png"
         }
       ]
+    },
+
+    {
+      "name": "Taylor Swift",
+      "songs": [
+        {
+          "title": "Love Story",
+          "genre": "Pop",
+          "audio": "../audios/taylorswift/Taylor Swift - Love Story (Taylors Version) (Lyrics).mp3",
+          "picture": "../img/songPicture/talorswift.jpg"
+        },
+        {
+          "title": "You Belong With Me",
+          "genre": "Pop",
+          "audio": "../audios/taylorswift/Taylor Swift - You Belong With Me (Lyrics).mp3",
+          "picture": "../img/songPicture/talorswift.jpg"
+        }
+      ]
+    },
+
+    {
+      "name": "Ed Sheeran",
+      "songs": [
+        {
+          "title": "Perfect",
+          "genre": "Pop",
+          "audio": "../audios/edSheeran/Ed Sheeran - Perfect.mp3",
+          "picture": "../img/songPicture/edSheeran.jpg"
+        },
+        {
+          "title": "Photograph",
+          "genre": "Pop",
+          "audio": "../audios/edSheeran/Ed Sheeran - Photograph (Official Lyric Video) [KKQl-pIRQMY].mp3",
+          "picture": "../img/songPicture/edSheeran.jpg"
+        }
+      ]
+    },
+
+    {
+      "name": "Cup of Joe",
+      "songs": [
+        {
+          "title": "Multo",
+          "genre": "OPM",
+          "audio": "../audios/cupOfJoe/Multo - Cup of Joe (Official Lyric Video).mp3",
+          "picture": "../img/songPicture/cupofjoe.jpg"
+        },
+        {
+          "title": "Pahina",
+          "genre": "OPM",
+          "audio": "../audios/cupOfJoe/Pahina - Cup of Joe (Official Audio).mp3",
+          "picture": "../img/songPicture/cupofjoe.jpg"
+        }
+      ]
+    },
+
+    {
+      "name": "Paramore",
+      "songs": [
+        {
+          "title": "Still into you",
+          "genre": "Rock",
+          "audio": "../audios/paramore/Paramore - Still into You _ Lyrics [5z-lcBJK-FE].mp3",
+          "picture": "../img/songPicture/paramore.jpg"
+        },
+        {
+          "title": "Thats what you get",
+          "genre": "Rock",
+          "audio": "../audios/paramore/Paramore - That's What You Get (Lyrics).mp3",
+          "picture": "../img/songPicture/paramore.jpg"
+        }
+      ]
+    },
+        {
+      "name": "IV Of Spade",
+      "songs": [
+        {
+          "title": "Mundo",
+          "genre": "OPM",
+          "audio": "../audios/ivofspade/Mundo.mp3",
+          "picture": "../img/songPicture/ivofspade.jpg"
+        },
+        {
+          "title": "Ilaw Sa Daan",
+          "genre": "OPM",
+          "audio": "../audios/ivofspade/Ilaw Sa Daan.mp3",
+          "picture": "../img/songPicture/ivofspade.jpg"
+        }
+      ]
+    },
+
+    {
+      "name": "System Of Dawn",
+      "songs": [
+        {
+          "title": "Chop Suey!",
+          "genre": "Metal",
+          "audio": "../audios/system of dawn/System Of A Down - Chop Suey! (lyrics).mp3",
+          "picture": "../img/songPicture/systemofdawn.jpg"
+        },
+        {
+          "title": "Toxicity",
+          "genre": "Metal",
+          "audio": "../audios/system of dawn/System Of A Down - Toxicity (lyrics).mp3",
+          "picture": "../img/songPicture/systemofdawn.jpg"
+        }
+      ]
+    },
+
+    {
+      "name": "Twice",
+      "songs": [
+        {
+          "title": "What Is Love",
+          "genre": "K-Pop",
+          "audio": "../audios/twice/TWICE (트와이스) - What is Love_ [HANROMENG Color Coded Lyrics].mp3",
+          "picture": "../img/songPicture/Twice_-_Feel_Special.png"
+        },
+        {
+          "title": "Strategy",
+          "genre": "K-Pop",
+          "audio": "../audios/twice/TWICE - Strategy (Lyrics).mp3",
+          "picture": "../img/songPicture/Twice_-_Feel_Special.png"
+        }
+      ]
+    },
+
+    {
+      "name": "Yorushika",
+      "songs": [
+        {
+          "title": "Say It",
+          "genre": "J-Pop",
+          "audio": "../audios/yorushika/ヨルシカ - 言って(Music Video).mp3",
+          "picture": "../img/songPicture/yorushika.jpg"
+        },
+        {
+          "title": "Just a Sunny Day for You",
+          "genre": "J-Pop",
+          "audio": "../audios/yorushika/ヨルシカ - ただ君に晴れ (MUSIC VIDEO).mp3",
+          "picture": "../img/songPicture/yorushika.jpg"
+        }
+      ]
+    },
+
+    {
+      "name": "The killers",
+      "songs": [
+        {
+          "title": "Mr Brightside",
+          "genre": "Indie Rock",
+          "audio": "../audios/the killers/The Killers - Mr Brightside (Lyrics).mp3",
+          "picture": "../img/songPicture/The_Killers_-_Hot_Fuss.png"
+        }
+      ]
     }
+
   ]
 }
-
-
-
-
-
