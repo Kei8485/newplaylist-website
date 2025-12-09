@@ -100,11 +100,11 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       });
 
-      // Manually add the song here, after allSongs exists
       let playlistName = "My Favorites";
       let playlist = playlists.find((p) => p.name === playlistName);
       if (!playlist) {
         playlist = {
+          id: Date.now(), // 🔹 Add unique ID
           name: playlistName,
           description: "My favorite songs",
           songs: [],
@@ -540,7 +540,8 @@ function displayPlaylistSongs(playlist) {
     // ❌ REMOVE FROM PLAYLIST
     card.querySelector(".remove-icon").addEventListener("click", () => {
       playlist.songs.splice(index, 1); // remove song from playlist
-      displayPlaylistSongs(playlist); // re-render
+      displayPlaylistSongs(playlist); // re-render songs view
+      displayPlaylists(); // 🔹 refresh playlist grid to update count
       showSuccessMessage("Song removed from playlist");
     });
 
@@ -605,6 +606,7 @@ document
 
     // Create playlist object
     const newPlaylist = {
+      id: Date.now(), // 🔹 Add unique ID
       name: playlistName,
       description: playlistDesc,
       songs: [],
@@ -1041,10 +1043,12 @@ function toggleFullscreen() {
   if (!isFullscreen) {
     footer.classList.add("footer--fullscreen");
     body.style.display = "flex";
+    parentFooter.style.background = "none";
   } else {
     footer.classList.remove("footer--fullscreen");
 
     body.style.display = "block";
+    parentFooter.style.background = "rgba(12, 12, 12, 0.384)";
   }
 
   isFullscreen = !isFullscreen;
@@ -1469,6 +1473,8 @@ function addSongToPlaylist(playlist, song) {
 
   if (!exists) {
     playlist.songs.push(song);
+
+    displayPlaylists(); // 🔹 refresh playlist grid to update count
 
     // Show feedback
     const msg = document.createElement("div");

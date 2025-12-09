@@ -1,0 +1,793 @@
+/* ============================================
+   MEDIA QUERIES - RESPONSIVE DESIGN
+   ============================================ */
+
+/* Tablet (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  html {
+    font-size: 62%;
+  }
+
+  .header__container {
+    max-width: 92%;
+  }
+
+  /* Header Icons */
+  .header__icon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .header__logo {
+    height: 110px;
+    width: 110px;
+  }
+
+  .header__profile {
+    height: 110px;
+    width: 110px;
+  }
+
+  .search-song-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .song-card {
+    width: 100%;
+    max-width: 350px;
+  }
+
+  .song-card .play-song-btn {
+    left: 70%;
+    top: 50%;
+    width: 50px;
+    height: 50px;
+  }
+
+  /* Song Card Icons */
+  .song-card .heart-icon {
+    height: 32px;
+    width: 32px;
+  }
+
+  .song-card .add-to-queue-btn {
+    height: 32px;
+    width: 32px;
+  }
+
+  .addToPlaylistIcon {
+    width: 29px;
+    height: 29px;
+  }
+
+  .main__recent-playlist-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .main__genre-heading-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Genre Cards */
+  .main__genre-card {
+    height: 80px;
+  }
+
+  .main__genre-name {
+    font-size: 2.4rem;
+  }
+
+  .main__artist-heading-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Artist Cards */
+  .main__artist-card {
+    width: 170px;
+    height: 190px;
+  }
+
+  .main__artist-img {
+    width: 130px;
+    height: 130px;
+  }
+
+  .main__artist-name {
+    font-size: 1.3rem;
+  }
+
+  /* Favorites */
+  .main__favorites-card {
+    height: 65px;
+    padding: 0 12px;
+  }
+
+  .main__fav-song-img-container {
+    gap: 8px;
+  }
+
+  .main__fav-song-img {
+    width: 38px;
+    height: 38px;
+  }
+
+  .main__fav-song-title {
+    font-size: 1.3rem;
+  }
+
+  .main__fav-song-artist {
+    font-size: 1.2rem;
+  }
+
+  .main__playlist-heading-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+
+  .main__nav-menu-container {
+    width: 50%;
+  }
+
+  .queue-container {
+    width: 70%;
+  }
+
+  .add-to-playlist-popup-container {
+    max-width: 400px;
+  }
+
+  /* Queue Icons */
+  .x-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .queue-card .x-icon {
+    width: 17px;
+    height: 17px;
+  }
+}
+
+/* Desktop (1025px - 1440px) */
+@media (min-width: 1025px) and (max-width: 1440px) {
+  html {
+    font-size: 64.5%;
+  }
+
+  /* Header Icons */
+  .header__icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .header__logo {
+    height: 120px;
+    width: 120px;
+  }
+
+  .header__profile {
+    left: 50px;
+    width: 150px;
+    height: 150px;
+  }
+
+  .search-song-container {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+  }
+
+  .song-card {
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .song-card .play-song-btn {
+    left: 77%;
+    top: 60%;
+    width: 55px;
+    height: 55px;
+    transform: translate(-50%, -50%);
+  }
+
+  .song-card:hover .play-song-btn {
+    opacity: 1;
+  }
+
+  .song-card .play-song-btn:hover {
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+
+  .song-card .play-song-btn:active {
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+
+  /* Song Card Icons */
+  .song-card .heart-icon {
+    height: 34px;
+    width: 34px;
+  }
+
+  .song-card .add-to-queue-btn {
+    height: 34px;
+    width: 34px;
+  }
+
+  .addToPlaylistIcon {
+    width: 31px;
+    height: 31px;
+  }
+
+  /* Footer Icons */
+  .audio-btn {
+    height: 38px;
+    width: 38px;
+  }
+
+  .play-btn {
+    height: 45px;
+    width: 45px;
+  }
+
+  .heart-icon {
+    height: 23px;
+    width: 23px;
+  }
+
+  .footer__maximize-wrapper {
+    height: 23px;
+    width: 23px;
+  }
+
+  .queue-icon {
+    height: 23px;
+    width: 23px;
+  }
+
+  .main__recent-playlist-container {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* Recent Card Play Button */
+  .main__recent-playlist-container .play-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .main__genre-heading-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* Genre Cards */
+  .main__genre-card {
+    height: 85px;
+  }
+
+  .main__genre-name {
+    font-size: 2.5rem;
+  }
+
+  .main__artist-heading-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Artist Cards */
+  .main__artist-card {
+    width: 180px;
+    height: 200px;
+  }
+
+  .main__artist-img {
+    width: 140px;
+    height: 140px;
+  }
+
+  .main__artist-name {
+    font-size: 1.4rem;
+  }
+
+  /* Artist Play Button */
+  .main__artist-img .play-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  /* Favorites */
+  .main__favorites-card {
+    height: 70px;
+    padding: 0 14px;
+  }
+
+  .main__fav-song-img-container {
+    gap: 10px;
+  }
+
+  .main__fav-song-img {
+    width: 42px;
+    height: 42px;
+    border-radius: 5px;
+  }
+
+  .main__fav-song-title {
+    font-size: 1.4rem;
+  }
+
+  .main__fav-song-artist {
+    font-size: 1.3rem;
+  }
+
+  .main__playlist-heading-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+
+  .main__nav-menu-container {
+    width: 40%;
+  }
+
+  .queue-container {
+    width: 60%;
+  }
+
+  /* Queue Icons */
+  .x-icon {
+    width: 23px;
+    height: 23px;
+  }
+
+  .queue-card .x-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* Back Button */
+  .back-btn-icon {
+    width: 34px;
+  }
+
+  /* Favorites Icons */
+  .main__favorites-container .play-btn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .main__favorites-container .heart-icon {
+    height: 23px;
+    width: 23px;
+  }
+}
+
+/* Large Desktop (1441px+) */
+@media (min-width: 1441px) {
+  html {
+    font-size: 68%;
+  }
+
+  .header__container {
+    margin: 0 auto;
+  }
+
+  /* Header Icons */
+  .header__icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .header__logo {
+    height: 130px;
+    width: 130px;
+  }
+
+  .header__profile {
+    height: 130px;
+    width: 130px;
+    left: -10px;
+  }
+
+  .header__container,
+  main > *,
+  .main__home-container,
+  .main__genre-container,
+  .main__artist-container,
+  .main__favorites-container,
+  .main__playlist-container {
+    max-width: 1400px;
+  }
+
+  .search-song-container {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+  }
+
+  .song-card {
+    width: 100%;
+    max-width: 380px;
+  }
+
+  .song-card .play-song-btn {
+    left: 80%;
+    top: 62%;
+    width: 60px;
+    height: 60px;
+    transform: translate(-50%, -50%);
+  }
+
+  .song-card:hover .play-song-btn {
+    opacity: 1;
+  }
+
+  .song-card .play-song-btn:hover {
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+
+  .song-card .play-song-btn:active {
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+
+  /* Song Card Icons */
+  .song-card .heart-icon {
+    height: 36px;
+    width: 36px;
+  }
+
+  .song-card .add-to-queue-btn {
+    height: 36px;
+    width: 36px;
+  }
+
+  .addToPlaylistIcon {
+    width: 33px;
+    height: 33px;
+  }
+
+  /* Footer Icons */
+  .audio-btn {
+    height: 40px;
+    width: 40px;
+  }
+
+  .play-btn {
+    height: 48px;
+    width: 48px;
+  }
+
+  .heart-icon {
+    height: 25px;
+    width: 25px;
+  }
+
+  .footer__maximize-wrapper {
+    height: 25px;
+    width: 25px;
+  }
+
+  .queue-icon {
+    height: 25px;
+    width: 25px;
+  }
+
+  .main__recent-playlist-container {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  /* Recent Card Play Button */
+  .main__recent-playlist-container .play-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .main__genre-heading-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  /* Genre Cards */
+  .main__genre-card {
+    height: 90px;
+  }
+
+  .main__genre-name {
+    font-size: 2.6rem;
+  }
+
+  .main__artist-heading-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  /* Artist Cards */
+  .main__artist-card {
+    width: 190px;
+    height: 210px;
+  }
+
+  .main__artist-img {
+    width: 150px;
+    height: 150px;
+  }
+
+  .main__artist-name {
+    font-size: 1.5rem;
+  }
+
+  /* Artist Play Button */
+  .main__artist-img .play-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  /* Favorites */
+  .main__favorites-card {
+    height: 75px;
+    padding: 0 16px;
+  }
+
+  .main__fav-song-img-container {
+    gap: 12px;
+  }
+
+  .main__fav-song-img {
+    width: 46px;
+    height: 46px;
+    border-radius: 6px;
+  }
+
+  .main__fav-song-title {
+    font-size: 1.5rem;
+  }
+
+  .main__fav-song-artist {
+    font-size: 1.4rem;
+  }
+
+  .main__playlist-heading-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+
+  .main__nav-menu-container {
+    width: 35%;
+    max-width: 500px;
+  }
+
+  .queue-container {
+    width: 50%;
+    max-width: 800px;
+  }
+
+  /* Queue Icons */
+  .x-icon {
+    width: 25px;
+    height: 25px;
+  }
+
+  .queue-card .x-icon {
+    width: 19px;
+    height: 19px;
+  }
+
+  /* Back Button */
+  .back-btn-icon {
+    width: 36px;
+  }
+
+  /* Favorites Icons */
+  .main__favorites-container .play-btn {
+    width: 30px;
+    height: 30px;
+  }
+
+  .main__favorites-container .heart-icon {
+    height: 25px;
+    width: 25px;
+  }
+
+  /* Playlist Detail Icons */
+  .show-playlist-songs-container .play-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .remove-icon {
+    width: 26px;
+    height: 26px;
+  }
+}
+
+/* Landscape Mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+  .footer--fullscreen .footer__song-img {
+    width: 120px;
+    height: 120px;
+  }
+
+  .footer--fullscreen .footer__container--active {
+    grid-template-rows: 1fr 0.5fr 0.5fr;
+  }
+
+  .queue-container {
+    max-height: 250px;
+  }
+}
+
+/* Ultra-wide screens (1920px+) */
+@media (min-width: 1920px) {
+  html {
+    font-size: 70%;
+  }
+
+  .header__container {
+    margin: 0 auto;
+  }
+
+  /* Header Icons */
+  .header__icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .header__logo {
+    height: 140px;
+    width: 140px;
+  }
+
+  .header__profile {
+    height: 140px;
+    width: 140px;
+  }
+
+  .search-song-container {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 35px;
+  }
+
+  .song-card {
+    max-width: 420px;
+  }
+
+  .song-card .play-song-btn {
+    left: 80%;
+    top: 65%;
+    width: 65px;
+    height: 65px;
+    transform: translate(-50%, -50%);
+  }
+
+  /* Song Card Icons */
+  .song-card .heart-icon {
+    height: 38px;
+    width: 38px;
+  }
+
+  .song-card .add-to-queue-btn {
+    height: 38px;
+    width: 38px;
+  }
+
+  .addToPlaylistIcon {
+    width: 35px;
+    height: 35px;
+  }
+
+  /* Footer Icons */
+  .audio-btn {
+    height: 42px;
+    width: 42px;
+  }
+
+  .play-btn {
+    height: 50px;
+    width: 50px;
+  }
+
+  .heart-icon {
+    height: 27px;
+    width: 27px;
+  }
+
+  .footer__maximize-wrapper {
+    height: 27px;
+    width: 27px;
+  }
+
+  .queue-icon {
+    height: 27px;
+    width: 27px;
+  }
+
+  /* Recent Card Play Button */
+  .main__recent-playlist-container .play-btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  /* Genre Cards */
+  .main__genre-card {
+    height: 95px;
+  }
+
+  .main__genre-name {
+    font-size: 2.7rem;
+  }
+
+  /* Artist Cards */
+  .main__artist-card {
+    width: 200px;
+    height: 220px;
+  }
+
+  .main__artist-img {
+    width: 160px;
+    height: 160px;
+  }
+
+  .main__artist-name {
+    font-size: 1.6rem;
+  }
+
+  /* Artist Play Button */
+  .main__artist-img .play-btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  /* Favorites */
+  .main__favorites-card {
+    height: 80px;
+    padding: 0 18px;
+  }
+
+  .main__fav-song-img-container {
+    gap: 14px;
+  }
+
+  .main__fav-song-img {
+    width: 50px;
+    height: 50px;
+    border-radius: 7px;
+  }
+
+  .main__fav-song-title {
+    font-size: 1.6rem;
+  }
+
+  .main__fav-song-artist {
+    font-size: 1.5rem;
+  }
+
+  .main__playlist-heading-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+
+  /* Queue Icons */
+  .x-icon {
+    width: 27px;
+    height: 27px;
+  }
+
+  .queue-card .x-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Back Button */
+  .back-btn-icon {
+    width: 38px;
+  }
+
+  /* Favorites Icons */
+  .main__favorites-container .play-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .main__favorites-container .heart-icon {
+    height: 27px;
+    width: 27px;
+  }
+
+  /* Playlist Detail Icons */
+  .show-playlist-songs-container .play-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .remove-icon {
+    width: 28px;
+    height: 28px;
+  }
+}
